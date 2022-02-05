@@ -3,7 +3,7 @@
  * 
  * Plugin Name: Codecorun - Product Offer Rules
  * Plugin URI: https://codecorun.com/plugins/product-offer-rules/
- * Description: A woocommerce extension that will allow you to offer or upsell products according to rules
+ * Description: A WooCommerce extension that will allow you to offer products according to rules
  * Author:      Codecorun
  * Plugin Type: Extension
  * Author URI: https://codecorun.com
@@ -53,15 +53,12 @@ spl_autoload_register(function ($class) {
 
 add_action('plugins_loaded','codecorun_por_init');
 function codecorun_por_init(){
-	
 	if(current_user_can('administrator')){
 		//load admin class
 		new codecorun\por\admin\codecorun_por_admin_class();
 	}
-	
 	//load global class
-	new codecorun\por\main\codecorun_por_main_class();
-	
+	new codecorun\por\main\codecorun_por_main_class();	
 }
 
 ?>

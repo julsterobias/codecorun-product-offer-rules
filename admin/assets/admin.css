@@ -1,0 +1,16 @@
+.codecorun_por_fields{
+    margin: 15px 0;
+}
+
+.codecorun_por_fields:first-child{
+    margin-top: 0;
+}
+
+.codecorun_por_fields:last-child{
+    margin-bottom: 0;
+}
+
+.codecorun_por_fields label input,
+.codecorun_por_fields label select{
+    display: block;
+}
