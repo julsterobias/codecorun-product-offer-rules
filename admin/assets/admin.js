@@ -82,13 +82,7 @@ var codecorun_init_to_offer_fields = function(){
  */
 var codecorun_init_to_rules_fields = function(){
 
-    var offer_hr = codecorun_por_elementor__(
-        {
-            type: 'hr'
-        }
-    );
 
-    jQuery(codecorun_por_offer_container).append(offer_hr);
     
     var rules_wrapper = codecorun_por_elementor__(
         {
@@ -128,7 +122,7 @@ var codecorun_init_to_rules_fields = function(){
             attributes: [
                 {
                     attr: 'class',
-                    value: 'codecorun_por_fields codecorun_por_rules_select'
+                    value: 'codecorun_por_fields codecorun_por_rules_select codecorun_por_block'
                 },
                 {
                     attr: 'id',
@@ -145,72 +139,6 @@ var codecorun_init_to_rules_fields = function(){
 
 
 }
-
-/**
- * 
- * render date rule
- * @since 1.0.0
- * 
- */
-var codecorun_render_date = function(value){
-
-    var parent = codecorun_por_elementor__(
-        {
-            type: 'div',
-            attributes: [
-                {
-                    attr: 'class',
-                    value: 'codecorun_por_fields codecorun_por_rule_field'
-                },
-                {
-                    attr: 'data-rule-type',
-                    value: 'date'
-                }
-            ]
-        }
-    );
-
-    var rule_label = codecorun_por_elementor__(
-        {
-            type: 'label',
-            text: 'Date'
-        }
-    );
-
-    /*wcdr_add_tooltip({
-        parent: rule_label,
-        text: wcdr_label_factory.tooltip_date
-    });*/
-
-    var el = codecorun_por_elementor__(
-        {
-            type: 'input',
-            attributes: [
-                {
-                    attr: 'class',
-                    value: 'wcdr_date_rule_el'
-                },
-                {
-                    attr: 'type',
-                    value: 'date'
-                },
-                {
-                    attr: 'name',
-                    value: 'wcdr_field[date-'+codecorun_por_unique_name()+']'
-                },
-                {
-                    attr: 'value',
-                    value: value
-                }
-            ]
-        }
-    );
-    parent.appendChild(rule_label);
-    rule_label.appendChild(el);
-    jQuery(codecorun_por_offer_container).append(parent);
-    codecorun_por_create_conditions(parent);
-}
-
 
 /**
  * 
@@ -419,6 +347,41 @@ function codecorun_por_init_selectwoo(field_class = null)
 
 /**
  * 
+ * 
+ * 
+ * 
+*/
+function codecorun_por_add_tooltip(args = null){
+    if(!args)
+        return;
+
+    var tooltip_icon = codecorun_por_elementor__(
+        {
+            type: 'span',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_tooltip dashicons dashicons-editor-help'
+                }
+            ]
+        }
+    );
+
+    var tooltip_text = codecorun_por_elementor__(
+        {
+            type: 'i',
+            text: args.text
+        }
+    );
+    
+    tooltip_icon.appendChild(tooltip_text);
+    args.parent.appendChild(tooltip_icon);
+
+}
+
+
+/**
+ * 
  * initialize
  * @since 1.0.0
  * 
@@ -438,14 +401,19 @@ jQuery(document).ready(function(){
                 codecorun_render_date('');
                 break;
             case 'date_range':
+                codecorun_render_date_range(['','']);
                 break;
             case 'in_cart_products':
+                codecorun_render_in_cart_products([]);
                 break;
             case 'in_product_page':
+                codecorun_render_in_product_page(0);
                 break;
             case 'is_logged_in':
+                codecorun_render_is_logged_in(0);
                 break;
             case 'in_page':
+                codecorun_render_in_page(0);
                 break;
             case 'in_post':
                 break;
@@ -457,3 +425,357 @@ jQuery(document).ready(function(){
         }
     });
 });
+
+
+/**
+ * 
+ * render date rule
+ * @since 1.0.0
+ * 
+ */
+ var codecorun_render_date = function(value){
+
+    var parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: 'date'
+                }
+            ]
+        }
+    );
+
+    var rule_label = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: 'Date'
+        }
+    );
+
+    codecorun_por_add_tooltip({
+        parent: rule_label,
+        text: 'Date Tooltip'
+    });
+
+    var el = codecorun_por_elementor__(
+        {
+            type: 'input',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'wcdr_date_rule_el'
+                },
+                {
+                    attr: 'type',
+                    value: 'date'
+                },
+                {
+                    attr: 'name',
+                    value: 'codecorun_por_field[date-'+codecorun_por_unique_name()+']'
+                },
+                {
+                    attr: 'value',
+                    value: value
+                }
+            ]
+        }
+    );
+    parent.appendChild(rule_label);
+    rule_label.appendChild(el);
+    jQuery(codecorun_por_offer_container).append(parent);
+    codecorun_por_create_conditions(parent);
+}
+
+/**
+ * 
+ * 
+ */
+
+var codecorun_render_date_range = function(values = []){
+    var parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: 'date_range'
+                }
+            ]
+        }
+    );
+
+    var rule_label = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: 'Date Range',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_block'
+                }
+            ]
+        }
+    );
+
+    codecorun_por_add_tooltip({
+        parent: rule_label,
+        text: 'Date Range Tooltip'
+    });
+
+    parent.appendChild(rule_label);
+
+    var label_from = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: 'From',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_label_inline'
+                }
+            ]
+        }
+    );
+
+    var unique_id = codecorun_por_unique_name();
+
+    var from = codecorun_por_elementor__(
+        {
+            type: 'input',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'wcdr_date_rule_el'
+                },
+                {
+                    attr: 'type',
+                    value: 'date'
+                },
+                {
+                    attr: 'name',
+                    value: 'codecorun_por_field[date_range-'+unique_id+'][from]'
+                },
+                {
+                    attr: 'value',
+                    value: values[0]
+                }
+            ]
+        }
+    );
+    
+    label_from.appendChild(from);
+    parent.appendChild(label_from);
+
+    var label_to = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: 'To',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_label_inline'
+                }
+            ]
+        }
+    );
+    var to = codecorun_por_elementor__(
+        {
+            type: 'input',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'wcdr_date_rule_el'
+                },
+                {
+                    attr: 'type',
+                    value: 'date'
+                },
+                {
+                    attr: 'name',
+                    value: 'codecorun_por_field[date_range-'+unique_id+'][to]'
+                },
+                {
+                    attr: 'value',
+                    value: values[1]
+                }
+            ]
+        }
+    );
+
+    label_to.appendChild(to);
+    parent.appendChild(label_to);
+    jQuery(codecorun_por_offer_container).append(parent);
+    codecorun_por_create_conditions(parent);
+
+}
+
+/**
+ * 
+ * 
+ * 
+ * 
+ */
+var codecorun_render_in_cart_products = function(products = [])
+{
+    var unique_id = codecorun_por_unique_name();
+    var parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: 'in_cart_product'
+                }
+            ]
+        }
+    );
+
+    var label = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: 'In cart products'
+        }
+    );
+
+    codecorun_por_add_tooltip({
+        parent: label,
+        text: 'In cart products'
+    });
+
+    var select_products = codecorun_por_elementor__(
+        {
+            type: 'select',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field codecorun_por_block widefat'
+                },
+                {
+                    attr: 'id',
+                    value: 'codecorun_por_ics-'+unique_id
+                },
+                {
+                    attr: 'name',
+                    value: 'codecorun_por_field[in_cart_product-'+unique_id+']'
+                },
+                {
+                    attr: 'multiple',
+                    value: true
+                }
+            ]
+            
+        }
+    );
+
+    label.appendChild(select_products);
+    parent.appendChild(label);
+    jQuery(codecorun_por_offer_container).append(parent);
+    codecorun_por_create_conditions(parent);
+    codecorun_por_init_selectwoo(
+        {
+            el: '#codecorun_por_ics-'+unique_id,
+            action: 'codecorun_offer_product_options'
+        }
+    );
+
+}
+
+var codecorun_render_in_product_page = function(page = 0){
+    var unique_id = codecorun_por_unique_name();
+    var parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: 'in_product_page'
+                }
+            ]
+        }
+    );
+
+    var label = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: 'In product page'
+        }
+    );
+
+    codecorun_por_add_tooltip({
+        parent: label,
+        text: 'In product page'
+    });
+
+    var select_products = codecorun_por_elementor__(
+        {
+            type: 'select',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field codecorun_por_block widefat'
+                },
+                {
+                    attr: 'id',
+                    value: 'codecorun_por_in_p_p-'+unique_id
+                },
+                {
+                    attr: 'name',
+                    value: 'codecorun_por_field[in_product_page-'+unique_id+']'
+                }
+            ]
+            
+        }
+    );
+
+    label.appendChild(select_products);
+    parent.appendChild(label);
+    jQuery(codecorun_por_offer_container).append(parent);
+    codecorun_por_create_conditions(parent);
+    codecorun_por_init_selectwoo(
+        {
+            el: '#codecorun_por_in_p_p-'+unique_id,
+            action: 'codecorun_offer_product_options'
+        }
+    );
+}
+
+var codecorun_render_is_logged_in = function(user_id = 0){
+    var parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: 'in_product_page'
+                }
+            ],
+            text: 'User is logged in (no field to setup)'
+        }
+    );
+
+    jQuery(codecorun_por_offer_container).append(parent);
+    codecorun_por_create_conditions(parent);
+}
+
