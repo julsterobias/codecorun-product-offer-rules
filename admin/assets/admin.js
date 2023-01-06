@@ -67,7 +67,9 @@ var codecorun_init_to_offer_fields = function(){
     codecorun_por_init_selectwoo(
         {
             el: '#codecorun_por_options',
-            action: 'codecorun_offer_product_options'
+            action: 'codecorun_offer_post_page_options',
+            placeholder: 'Select product',
+            post_type: 'product'
         }
     );
 
@@ -96,14 +98,15 @@ var codecorun_init_to_rules_fields = function(){
         }
     );
 
+    var rule_space = codecorun_por_elementor__( { type: 'hr', attributes: [ { attr: 'class', value: 'codecorun_divider' } ] } );
+    
+    var rule_header = codecorun_por_elementor__( { type: 'label' } );
 
-    var rule_header = codecorun_por_elementor__(
-        {
-            type: 'label',
-            text: 'Rules'
-        }
-    );
-
+        /**
+         * 
+         * last
+         * 
+         */
     var options = [{text: 'Select Rule', value: ''}];
     if(codecorun_por_rules){
         for(var x in codecorun_por_rules){
@@ -132,10 +135,66 @@ var codecorun_init_to_rules_fields = function(){
             options: options
         }
     );
+
+    var rules_button = codecorun_por_elementor__(
+        {
+            type: 'input',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'button button-medium button-primary'
+                },
+                {
+                    attr: 'id',
+                    value: 'codecorun_por_add_rules'
+                },
+                {
+                    attr: 'type',
+                    value: 'button'
+                },
+                {
+                    attr: 'value',
+                    value: 'Add Rule'
+                }
+            ]
+        }
+    )
     
+    rules_wrapper.appendChild(rule_space);
     rules_wrapper.appendChild(rule_header);
     rule_header.appendChild(rules_select);
+    rule_header.appendChild(rules_button);
+
+    //no rules avaiable
+    var no_rules_parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_no_values'
+                }
+            ]
+        }
+    );
+
+    var no_rules_text = codecorun_por_elementor__(
+        {
+            type: 'span',
+            text: 'No rules available',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_no_values_text'
+                }
+            ]
+        }
+    );
+
+    jQuery(no_rules_parent).append(no_rules_text);
     jQuery(codecorun_por_offer_container).append(rules_wrapper);
+    jQuery(codecorun_por_offer_container).append(no_rules_parent);
+    
 
 
 }
@@ -212,13 +271,14 @@ function codecorun_por_init_selectwoo(field_class = null)
 
     jQuery(field_class.el).selectWoo({
         minimumInputLength: 3,
-        placeholder: 'Select product',
+        placeholder: field_class.placeholder,
         ajax: {
             url: codecorun_por_ajax.ajaxurl,
             data: function (params) {
                 var query = {
                     search: params.term,
                     action: field_class.action,
+                    post_type: field_class.post_type,
                     nonce: codecorun_por_nonce
                 }
                 return query;
@@ -293,6 +353,10 @@ function codecorun_por_init_selectwoo(field_class = null)
                 {
                     text: 'And',
                     value: 'and'
+                },
+                {
+                    text: 'Or',
+                    value: 'or'
                 }
             ]
         }
@@ -306,10 +370,6 @@ function codecorun_por_init_selectwoo(field_class = null)
         {
             type: 'a',
             attributes: [
-                {
-                attr: 'id',
-                value: 'codecorun_por_condition_remove_field'
-                },
                 {
                     attr: 'class',
                     value: 'codecorun_por_condition_remove_field'
@@ -386,44 +446,146 @@ function codecorun_por_add_tooltip(args = null){
  * @since 1.0.0
  * 
  */
+
+var codecorun_field_label_payload = {
+    last_views: {
+        field_id: 'codecorun_dy_field_last_views',
+        label: 'Last viewed product(s)',
+        tooltip: 'Offer product(s) if the user viewed one or all selected product(s)',
+        multiple: true,
+        placeholder: 'Select Product(s)',
+        post_type: 'product'
+    },
+    had_purchased: {
+        field_id: 'codecorun_dy_field_had_purchased',
+        label: 'Latest purchased product(s)',
+        tooltip: 'Offer the product(s) if the user purchased one or all selected product(s)',
+        multiple: true,
+        placeholder: 'Select Product(s)',
+        post_type: 'product'
+    },
+    in_post: {
+        field_id: 'codecorun_dy_field_in_post',
+        label: 'In post(s)',
+        tooltip: 'Offer product(s) if the user is in post(s)',
+        multiple: true,
+        placeholder: 'Select post(s)',
+        post_type: 'post'
+    },
+    in_page: {
+        field_id: 'codecorun_dy_field_in_page',
+        label: 'In page(s)',
+        tooltip: 'Offer product(s) if the user is in page(s)',
+        multiple: true,
+        placeholder: 'Select page(s)',
+        post_type: 'page'
+    },
+    in_product_page: {
+        field_id: 'codecorun_dy_field_in_product_page',
+        label: 'In product page',
+        tooltip: 'Offer product(s) if the user is in product page',
+        multiple: false,
+        placeholder: 'Select product',
+        post_type: 'product'
+    },
+    in_cart_products: {
+        field_id: 'codecorun_dy_field_in_cart_products',
+        label: 'In cart product(s)',
+        tooltip: 'Offer product(s) if the user added on or all selected products',
+        multiple: true,
+        placeholder: 'Select product',
+        post_type: 'product'
+    },
+    have_url_param: {
+        field_id: 'codecorun_dy_field_params_url',
+        label: 'Has URL parameters',
+        tooltip: 'Offer product(s) if the URL parameters are present',
+        multiple: false,
+        placeholder_key: 'Key',
+        placeholder_value: 'Value'
+    }
+}
+
 jQuery(document).ready(function(){
     //initialize fields
     codecorun_init_to_offer_fields();
     codecorun_init_to_rules_fields();
 
-    jQuery('#codecorun_por_rules_select').change(function(){
-        var value = jQuery(this).val();
+    jQuery('#codecorun_por_add_rules').click( function(){
+
+        var value = jQuery('#codecorun_por_rules_select').val();
         if(!value)
             return;
 
         switch(value){
             case 'date':
-                codecorun_render_date('');
+                codecorun_por_render_date('');
                 break;
             case 'date_range':
-                codecorun_render_date_range(['','']);
-                break;
-            case 'in_cart_products':
-                codecorun_render_in_cart_products([]);
-                break;
-            case 'in_product_page':
-                codecorun_render_in_product_page(0);
+                codecorun_por_render_date_range(['','']);
                 break;
             case 'is_logged_in':
-                codecorun_render_is_logged_in(0);
+                codecorun_por_render_is_logged_in(0);
                 break;
+            case 'in_cart_products':
+            case 'in_product_page':
             case 'in_page':
-                codecorun_render_in_page(0);
-                break;
             case 'in_post':
-                break;
             case 'last_views':
-                break;
             case 'had_purchased':
+                codecorun_por_generate_fields( [], value, codecorun_field_label_payload[value] );
                 break;
-            
+            case 'have_url_param':
+                codecorun_por_url_param( [], value, codecorun_field_label_payload[value] );
+                break;
+        }
+        jQuery('#codecorun_por_rules_select').val('');
+
+        check_rules_available();
+
+    } );
+
+
+    jQuery('body').on('click','.codecorun_add_list_field', function(){
+        var parent = jQuery(this).closest('table');
+        var cloned = jQuery(this).closest('tr').clone(true);
+        jQuery(parent).append(cloned);
+    });
+
+    jQuery('body').on('click','.codecorun_remove_list_field', function(){
+        var get_con = jQuery('.codecorun_por_table_list tr').length;
+        if(get_con <= 1){
+          
+            jQuery('.codecorun_por_table_list tr').each(function(i){
+                if(i == 0){
+                    var td = jQuery(this).find('td:nth-child(1)');
+                    jQuery(td).find('input[type=text]').focus();
+                }
+                jQuery(this).find('input[type=text]').val('');
+            });
+        }else{
+            var tr = jQuery(this).closest('tr');
+            var get_key = jQuery(tr[0]).find('input').val();
+            if(confirm('You are about to remove '+get_key+' from the list.')){
+                jQuery(this).closest('tr').remove();
+            }
+        }
+        
+    });
+
+    jQuery('body').on('click','.codecorun_por_condition_remove_field', function(){
+        var parent = jQuery(this).closest('.codecorun_por_rule_field');
+        var type = jQuery(parent).attr('data-rule-type');
+        type = type.replaceAll('_',' ');
+        type = type[0].toUpperCase() + type.slice(1);
+        if( confirm('You are about to remove '+type+' rule.') ){
+            jQuery(parent).remove();
+            check_rules_available();
         }
     });
+
+    
+
 });
 
 
@@ -433,7 +595,7 @@ jQuery(document).ready(function(){
  * @since 1.0.0
  * 
  */
- var codecorun_render_date = function(value){
+ var codecorun_por_render_date = function(value){
 
     var parent = codecorun_por_elementor__(
         {
@@ -497,7 +659,7 @@ jQuery(document).ready(function(){
  * 
  */
 
-var codecorun_render_date_range = function(values = []){
+var codecorun_por_render_date_range = function(values = []){
     var parent = codecorun_por_elementor__(
         {
             type: 'div',
@@ -619,145 +781,8 @@ var codecorun_render_date_range = function(values = []){
 
 }
 
-/**
- * 
- * 
- * 
- * 
- */
-var codecorun_render_in_cart_products = function(products = [])
-{
-    var unique_id = codecorun_por_unique_name();
-    var parent = codecorun_por_elementor__(
-        {
-            type: 'div',
-            attributes: [
-                {
-                    attr: 'class',
-                    value: 'codecorun_por_fields codecorun_por_rule_field'
-                },
-                {
-                    attr: 'data-rule-type',
-                    value: 'in_cart_product'
-                }
-            ]
-        }
-    );
 
-    var label = codecorun_por_elementor__(
-        {
-            type: 'label',
-            text: 'In cart products'
-        }
-    );
-
-    codecorun_por_add_tooltip({
-        parent: label,
-        text: 'In cart products'
-    });
-
-    var select_products = codecorun_por_elementor__(
-        {
-            type: 'select',
-            attributes: [
-                {
-                    attr: 'class',
-                    value: 'codecorun_por_fields codecorun_por_rule_field codecorun_por_block widefat'
-                },
-                {
-                    attr: 'id',
-                    value: 'codecorun_por_ics-'+unique_id
-                },
-                {
-                    attr: 'name',
-                    value: 'codecorun_por_field[in_cart_product-'+unique_id+']'
-                },
-                {
-                    attr: 'multiple',
-                    value: true
-                }
-            ]
-            
-        }
-    );
-
-    label.appendChild(select_products);
-    parent.appendChild(label);
-    jQuery(codecorun_por_offer_container).append(parent);
-    codecorun_por_create_conditions(parent);
-    codecorun_por_init_selectwoo(
-        {
-            el: '#codecorun_por_ics-'+unique_id,
-            action: 'codecorun_offer_product_options'
-        }
-    );
-
-}
-
-var codecorun_render_in_product_page = function(page = 0){
-    var unique_id = codecorun_por_unique_name();
-    var parent = codecorun_por_elementor__(
-        {
-            type: 'div',
-            attributes: [
-                {
-                    attr: 'class',
-                    value: 'codecorun_por_fields codecorun_por_rule_field'
-                },
-                {
-                    attr: 'data-rule-type',
-                    value: 'in_product_page'
-                }
-            ]
-        }
-    );
-
-    var label = codecorun_por_elementor__(
-        {
-            type: 'label',
-            text: 'In product page'
-        }
-    );
-
-    codecorun_por_add_tooltip({
-        parent: label,
-        text: 'In product page'
-    });
-
-    var select_products = codecorun_por_elementor__(
-        {
-            type: 'select',
-            attributes: [
-                {
-                    attr: 'class',
-                    value: 'codecorun_por_fields codecorun_por_rule_field codecorun_por_block widefat'
-                },
-                {
-                    attr: 'id',
-                    value: 'codecorun_por_in_p_p-'+unique_id
-                },
-                {
-                    attr: 'name',
-                    value: 'codecorun_por_field[in_product_page-'+unique_id+']'
-                }
-            ]
-            
-        }
-    );
-
-    label.appendChild(select_products);
-    parent.appendChild(label);
-    jQuery(codecorun_por_offer_container).append(parent);
-    codecorun_por_create_conditions(parent);
-    codecorun_por_init_selectwoo(
-        {
-            el: '#codecorun_por_in_p_p-'+unique_id,
-            action: 'codecorun_offer_product_options'
-        }
-    );
-}
-
-var codecorun_render_is_logged_in = function(user_id = 0){
+var codecorun_por_render_is_logged_in = function(user_id = 0){
     var parent = codecorun_por_elementor__(
         {
             type: 'div',
@@ -779,3 +804,275 @@ var codecorun_render_is_logged_in = function(user_id = 0){
     codecorun_por_create_conditions(parent);
 }
 
+
+var codecorun_por_generate_fields = function(product_ids = [], type = '', attrs = null){
+    var unique_id = codecorun_por_unique_name();
+    var parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: type
+                }
+            ]
+        }
+    );
+
+    var label = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: attrs.label
+        }
+    );
+
+    codecorun_por_add_tooltip({
+        parent: label,
+        text: attrs.tooltip
+    });
+
+    var attr_values = [
+        {
+            attr: 'class',
+            value: 'codecorun_por_fields codecorun_por_rule_field codecorun_por_block widefat'
+        },
+        {
+            attr: 'id',
+            value: attrs.field_id+'-'+unique_id
+        },
+        {
+            attr: 'name',
+            value: 'codecorun_por_field['+attrs.field_id+'-'+unique_id+']'
+        }
+    ];
+
+    if( attrs.multiple ){
+        attr_values.push(
+            {
+                attr: 'multiple',
+                value: attrs.multiple
+            }
+        )
+    }
+
+    var select_products = codecorun_por_elementor__(
+        {
+            type: 'select',
+            attributes: attr_values
+        }
+    );
+
+    label.appendChild(select_products);
+    parent.appendChild(label);
+    jQuery(codecorun_por_offer_container).append(parent);
+    codecorun_por_create_conditions(parent);
+    codecorun_por_init_selectwoo(
+        {
+            el: '#'+attrs.field_id+'-'+unique_id,
+            action: 'codecorun_offer_post_page_options',
+            placeholder: attrs.placeholder,
+            post_type: attrs.post_type
+        }
+    );
+}
+
+var codecorun_por_url_param = function( params = [], rule = '', attrs = [] ){
+
+    var unique_id = codecorun_por_unique_name();
+    var parent = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: rule
+                }
+            ]
+        }
+    );
+
+    var el_label = codecorun_por_elementor__(
+        {
+            type: 'label',
+            text: attrs.label
+        }
+    );
+
+    codecorun_por_add_tooltip({
+        parent: el_label,
+        text: attrs.tooltip
+    }); 
+
+    var el_field_wrapper = codecorun_por_elementor__(
+        {
+            type: 'table',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_table codecorun_por_table_list widefat'
+                }
+            ]
+        }
+    );
+
+    var to_loop = (params.length > 0)? params.length : 1; 
+
+    for(var z = 0; z < to_loop; z++){
+
+        var el_field_wrapper_tr = codecorun_por_elementor__(
+            {
+                type: 'tr'
+            }
+        );
+        
+        for(var x = 1; x <= 2; x++){        
+            var to_add_field = null;
+            if(x == 1){
+                to_add_field = codecorun_por_elementor__(
+                    {
+                        type: 'input',
+                        attributes: [
+                            {
+                                attr: 'type',
+                                value: 'text'
+                            },  
+                            {
+                                attr: 'class',
+                                value: 'codecorun_por_field_list codecorun_por_field_list_key widefat'
+                            },
+                            {
+                                attr: 'name',
+                                value: 'codecorun_por_field['+rule+'-'+unique_id+'][]'
+                            },
+                            {
+                                attr: 'placeholder',
+                                value: attrs.placeholder_key
+                            },
+                            {
+                                attr: 'value',
+                                value: (params.length > 0)? params[z].key : ''
+                            }
+                        ]
+                    }
+                );
+            }else{
+                to_add_field = codecorun_por_elementor__(
+                    {
+                        type: 'input',
+                        attributes: [
+                            {
+                                attr: 'type',
+                                value: 'text'
+                            },  
+                            {
+                                attr: 'class',
+                                value: 'codecorun_por_field_list codecorun_por_field_list_value widefat'
+                            },
+                            {
+                                attr: 'name',
+                                value: 'codecorun_por_field['+rule+'-'+unique_id+'][]'
+                            },
+                            {
+                                attr: 'placeholder',
+                                value: attrs.placeholder_value
+                            },
+                            {
+                                attr: 'value',
+                                value: (params.length > 0)? params[z].value : ''
+                            }
+                        ]
+                    }
+                );
+            }
+            var el_field_td = codecorun_por_elementor__(
+                {
+                    type: 'td',
+                    attributes: [
+                        {
+                            attr: 'width',
+                            value: '45%'
+                        }
+                    ]
+                }
+            );
+            el_field_td.appendChild(to_add_field);
+            el_field_wrapper_tr.appendChild(el_field_td);
+        }
+        
+        var el_field_td_last = codecorun_por_elementor__(
+            {
+                type: 'td',
+                attributes: [
+                    {
+                        attr: 'width',
+                        value: '10%'
+                    }
+                ]
+            }  
+        );     
+
+        //add add button
+        var el_add_btn = codecorun_por_elementor__(
+            {
+                type: 'span',
+                attributes: [
+                    {
+                        attr: 'class',
+                        value: 'button button-primary codecorun_add_list_field code-por-add-'+rule+'-el'
+                    },
+                    {
+                        attr: 'title',
+                        value: 'Add'
+                    }
+                ],
+                text: '+'
+            }
+        )
+        var el_remove_btn = codecorun_por_elementor__(
+            {
+                type: 'span',
+                attributes: [
+                    {
+                        attr: 'class',
+                        value: 'button button-secondary codecorun_remove_list_field code-por-remove-'+rule+'-el'
+                    },
+                    {
+                        attr: 'title',
+                        value: 'Remove'
+                    }
+                ],
+                text: '-'
+            }
+        )
+        el_field_td_last.appendChild(el_add_btn);
+        el_field_td_last.appendChild(el_remove_btn);
+        el_field_wrapper_tr.appendChild(el_field_td_last); 
+        el_field_wrapper.appendChild(el_field_wrapper_tr);
+
+    //end of loop
+    }
+
+    parent.appendChild(el_label);
+    parent.appendChild(el_field_wrapper);
+    jQuery(codecorun_por_offer_container).append(parent);
+    codecorun_por_create_conditions(parent);
+
+}
+
+
+function check_rules_available()
+{
+    if(jQuery('.codecorun_por_rule_field').length > 0){
+        jQuery('.codecorun_por_no_values').hide();
+    }else{
+        jQuery('.codecorun_por_no_values').show();
+    }
+}

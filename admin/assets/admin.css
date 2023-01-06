@@ -71,3 +71,21 @@
 .codecorun_label_inline{
     margin-right: 20px;
 }
+
+select.codecorun_por_rules_select{
+    display: inline;
+    margin-right: 5px;
+}
+.codecorun_divider{
+    margin-bottom: 20px;
+}
+
+.codecorun_add_list_field{
+    margin: 0 3px !important;
+}
+
+.codecorun_por_no_values{
+    text-align: center;
+    padding: 10px 0;
+    border: 1px solid #CCC;
+}

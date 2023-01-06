@@ -72,10 +72,11 @@ class codecorun_por_common_class
 					'in_cart_products' => __('In cart products','codecorun-product-offer-rules'),
 					'in_product_page' => __('In product page','codecorun-product-offer-rules'),
                     'is_logged_in' => __('Is user logged in','codecorun-product-offer-rules'),
-                    'in_page' => __('In page','codecorun-product-offer-rules'),
+                    'in_page' => __('In pages','codecorun-product-offer-rules'),
                     'in_post' => __('In post','codecorun-product-offer-rules'),
-                    'last_views' => __('Last views','codecorun-product-offer-rules'),
-                    'had_purchased' => __('Last purchased','codecorun-product-offer-rules')
+                    'last_views' => __('Last product views','codecorun-product-offer-rules'),
+                    'had_purchased' => __('Last purchased product(s)','codecorun-product-offer-rules'),
+					'have_url_param' => __('Have URL Parameter', 'codecorun-product-offer-rules')
 				]
 			]
 		);

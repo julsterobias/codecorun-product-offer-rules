@@ -43,6 +43,8 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		add_action('add_meta_boxes',[$this,'meta_box']);
 		add_action('admin_enqueue_scripts',[$this, 'assets']);
 		add_action('wp_ajax_codecorun_offer_product_options',[$this,'codecorun_offer_product_options']);
+		add_action('wp_ajax_codecorun_offer_page_options',[$this,'codecorun_offer_page_options']);
+		add_action('wp_ajax_codecorun_offer_post_page_options',[$this, 'codecorun_offer_post_page_options']);
     }
 
 	/**
@@ -175,7 +177,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	/**
 	 * 
 	 * 
-	 * 
+	 * meta_html
 	 * 
 	 * 
 	 */
@@ -184,22 +186,28 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		$this->set_template('setup',['other' => 'admin']);
 	}
 
+
 	/**
 	 * 
-	 * 
+	 * codecorun_offer_post_page_options
+	 * @since 1.0.0
+	 * @param
+	 * @return
 	 * 
 	 * 
 	 */
-	public function codecorun_offer_product_options()
+	public function codecorun_offer_post_page_options()
 	{
 		if ( ! wp_verify_nonce( $_GET['nonce'], 'codecorun_por' ) ) {
             //do not echo anything will scare the cat
             exit();
         }
         $search = sanitize_text_field($_GET['search']);
+		$type = sanitize_text_field($_GET['post_type']);
+		$type = (isset($type))? $type : 'post';
         $args = [
             'posts_per_page' => -1,
-            'post_type' => 'product',
+            'post_type' => $type,
             's' => $search,
             'post_status' => 'publish'
         ];
