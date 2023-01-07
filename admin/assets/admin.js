@@ -10,6 +10,7 @@
 
 var codecorun_por_offer_container = '#codecorun_por_admin_offer';
 var codecorun_por_rule_container = '#codecorun_por_admin_rules';
+var codecorun_por_product_container = '#codecorun_por_admin_product_offer';
 
 
 /**
@@ -40,29 +41,44 @@ var codecorun_init_to_offer_fields = function(){
     );
     offer_wrapper.appendChild(offer_header);
 
-    //generate elements
-    var offer_select = codecorun_por_elementor__(
-        {
-            type: 'select',
-            attributes: [
-                {
-                    attr: 'id',
-                    value: 'codecorun_por_options'
-                },
-                {
-                    attr: 'class',
-                    value: 'codecorun_por_field codecorun_por_select widefat'
-                },
-                {
-                    attr: 'multiple',
-                    value: true
-                }
-            ]
-        }
-    );
-    offer_header.appendChild(offer_select);
+    var field_attributes = {
+        type: 'select',
+        attributes: [
+            {
+                attr: 'id',
+                value: 'codecorun_por_options'
+            },
+            {
+                attr: 'class',
+                value: 'codecorun_por_field codecorun_por_select widefat'
+            },
+            {
+                attr: 'multiple',
+                value: true
+            },
+            {
+                attr: 'name',
+                value: 'codecorun_por_product_offers[]'
+            }
+        ]
+    };
 
-    jQuery(codecorun_por_offer_container).append(offer_wrapper);
+    var options_fields = codecorun_render_saved_offers( 'offers' );
+
+    if( options_fields ){
+        if( options_fields.option_fields ){
+            field_attributes['options'] = options_fields.option_fields 
+        }
+        if( options_fields.selected ){
+            field_attributes['value'] = options_fields.selected 
+        }
+    }
+        
+    //generate elements
+    var offer_select = codecorun_por_elementor__( field_attributes );
+    offer_header.appendChild(offer_select);
+    jQuery(codecorun_por_product_container).append(offer_wrapper);
+    
     //init select2
     codecorun_por_init_selectwoo(
         {
@@ -97,8 +113,6 @@ var codecorun_init_to_rules_fields = function(){
             ]
         }
     );
-
-    var rule_space = codecorun_por_elementor__( { type: 'hr', attributes: [ { attr: 'class', value: 'codecorun_divider' } ] } );
     
     var rule_header = codecorun_por_elementor__( { type: 'label' } );
 
@@ -160,7 +174,6 @@ var codecorun_init_to_rules_fields = function(){
         }
     )
     
-    rules_wrapper.appendChild(rule_space);
     rules_wrapper.appendChild(rule_header);
     rule_header.appendChild(rules_select);
     rule_header.appendChild(rules_button);
@@ -525,7 +538,7 @@ jQuery(document).ready(function(){
                 codecorun_por_render_date_range(['','']);
                 break;
             case 'is_logged_in':
-                codecorun_por_render_is_logged_in(0);
+                codecorun_por_render_is_logged_in(0, value);
                 break;
             case 'in_cart_products':
             case 'in_product_page':
@@ -541,7 +554,7 @@ jQuery(document).ready(function(){
         }
         jQuery('#codecorun_por_rules_select').val('');
 
-        check_rules_available();
+        codecorun_check_rules_available();
 
     } );
 
@@ -580,11 +593,11 @@ jQuery(document).ready(function(){
         type = type[0].toUpperCase() + type.slice(1);
         if( confirm('You are about to remove '+type+' rule.') ){
             jQuery(parent).remove();
-            check_rules_available();
+            codecorun_check_rules_available();
         }
     });
 
-    
+    codecorun_render_saved_rules();
 
 });
 
@@ -595,7 +608,7 @@ jQuery(document).ready(function(){
  * @since 1.0.0
  * 
  */
- var codecorun_por_render_date = function(value){
+ var codecorun_por_render_date = function( value = '' ){
 
     var parent = codecorun_por_elementor__(
         {
@@ -631,7 +644,7 @@ jQuery(document).ready(function(){
             attributes: [
                 {
                     attr: 'class',
-                    value: 'wcdr_date_rule_el'
+                    value: 'codecorun_por_date_rule_el'
                 },
                 {
                     attr: 'type',
@@ -717,7 +730,7 @@ var codecorun_por_render_date_range = function(values = []){
             attributes: [
                 {
                     attr: 'class',
-                    value: 'wcdr_date_rule_el'
+                    value: 'codecorun_por_date_rule_el'
                 },
                 {
                     attr: 'type',
@@ -756,7 +769,7 @@ var codecorun_por_render_date_range = function(values = []){
             attributes: [
                 {
                     attr: 'class',
-                    value: 'wcdr_date_rule_el'
+                    value: 'codecorun_por_date_rule_el'
                 },
                 {
                     attr: 'type',
@@ -782,7 +795,9 @@ var codecorun_por_render_date_range = function(values = []){
 }
 
 
-var codecorun_por_render_is_logged_in = function(user_id = 0){
+var codecorun_por_render_is_logged_in = function(user_id = 0, type = null){
+    var unique_id = codecorun_por_unique_name();
+    var text = 'User is logged in (no field to setup)';
     var parent = codecorun_por_elementor__(
         {
             type: 'div',
@@ -793,19 +808,48 @@ var codecorun_por_render_is_logged_in = function(user_id = 0){
                 },
                 {
                     attr: 'data-rule-type',
-                    value: 'in_product_page'
+                    value: 'is_logged_in'
                 }
             ],
-            text: 'User is logged in (no field to setup)'
+            text: text
         }
     );
 
+    var field = codecorun_por_elementor__(
+        {
+            type: 'input',
+            attributes: [
+                {
+                    attr: 'class',
+                    value: 'codecorun_por_fields codecorun_por_rule_field'
+                },
+                {
+                    attr: 'data-rule-type',
+                    value: 'is_logged_in'
+                },
+                {
+                    attr: 'type',
+                    value: 'hidden'
+                },
+                {
+                    attr: 'name',
+                    value: 'codecorun_por_field['+type+'-'+unique_id+']'
+                },
+                {
+                    attr: 'value',
+                    value: 1
+                }
+            ]
+        }
+    );
+
+    jQuery(parent).append(field);
     jQuery(codecorun_por_offer_container).append(parent);
     codecorun_por_create_conditions(parent);
 }
 
 
-var codecorun_por_generate_fields = function(product_ids = [], type = '', attrs = null){
+var codecorun_por_generate_fields = function(products = [], type = '', attrs = null){
     var unique_id = codecorun_por_unique_name();
     var parent = codecorun_por_elementor__(
         {
@@ -843,10 +887,6 @@ var codecorun_por_generate_fields = function(product_ids = [], type = '', attrs 
         {
             attr: 'id',
             value: attrs.field_id+'-'+unique_id
-        },
-        {
-            attr: 'name',
-            value: 'codecorun_por_field['+attrs.field_id+'-'+unique_id+']'
         }
     ];
 
@@ -855,16 +895,44 @@ var codecorun_por_generate_fields = function(product_ids = [], type = '', attrs 
             {
                 attr: 'multiple',
                 value: attrs.multiple
+            },
+            {
+                attr: 'name',
+                value: 'codecorun_por_field['+attrs.field_id+'-'+unique_id+'][]'
+            }
+        )
+    }else{
+        attr_values.push(
+            {
+                attr: 'name',
+                value: 'codecorun_por_field['+attrs.field_id+'-'+unique_id+']'
             }
         )
     }
 
-    var select_products = codecorun_por_elementor__(
-        {
-            type: 'select',
-            attributes: attr_values
+    var  main_attrs = {
+        type: 'select',
+        attributes: attr_values
+    };
+
+    //set values
+    if( products.length > 0 ){
+        var opt = [];
+        var selected = [];
+        for( var x in products){
+            opt.push(
+                {
+                    text: products[x].title,
+                    value: products[x].id
+                }
+            )
+            selected.push(products[x].id);
         }
-    );
+        main_attrs['options'] = opt;
+        main_attrs['value'] = selected;
+    }
+
+    var select_products = codecorun_por_elementor__(main_attrs);
 
     label.appendChild(select_products);
     parent.appendChild(label);
@@ -880,7 +948,7 @@ var codecorun_por_generate_fields = function(product_ids = [], type = '', attrs 
     );
 }
 
-var codecorun_por_url_param = function( params = [], rule = '', attrs = [] ){
+var codecorun_por_url_param = function( params = [], rule = '', attrs = []){
 
     var unique_id = codecorun_por_unique_name();
     var parent = codecorun_por_elementor__(
@@ -1068,11 +1136,77 @@ var codecorun_por_url_param = function( params = [], rule = '', attrs = [] ){
 }
 
 
-function check_rules_available()
+var codecorun_check_rules_available = function ()
 {
     if(jQuery('.codecorun_por_rule_field').length > 0){
         jQuery('.codecorun_por_no_values').hide();
     }else{
         jQuery('.codecorun_por_no_values').show();
     }
+}
+
+/**
+ * 
+ * 
+ * render save rules
+ * 
+ * 
+ */
+var codecorun_render_saved_offers = function ( type = '' )
+{
+   if( codecorun_saved_offers && type == 'offers' ){
+        codecorun_saved_offers = JSON.parse( codecorun_saved_offers );
+        var options = [];
+        var options_selected = [];
+        for(var x in codecorun_saved_offers){
+            options.push(
+                {
+                    text: codecorun_saved_offers[x].title,
+                    value: codecorun_saved_offers[x].id
+                }
+            );
+            options_selected.push( codecorun_saved_offers[x].id );
+        }
+        return {
+            option_fields: options,
+            selected: options_selected
+        };
+   }
+   return;
+
+}
+
+var codecorun_render_saved_rules = function ()
+{
+    if( codecorun_saved_rules ){
+        var parent = jQuery(codecorun_por_offer_container);
+        codecorun_saved_rules = JSON.parse( codecorun_saved_rules );
+        for( var x in codecorun_saved_rules ){
+            var index = x.split( '-' );
+            switch( index[0] ){
+                case 'date':
+                    codecorun_por_render_date( codecorun_saved_rules[x] );
+                    break;
+                case 'date_range':
+                    codecorun_por_render_date_range( [codecorun_saved_rules[x].from, codecorun_saved_rules[x].to ] );
+                    break;
+                case 'is_logged_in':
+                    codecorun_por_render_is_logged_in(0, index[0]);
+                    break;
+                case 'codecorun_dy_field_in_cart_products':
+                case 'codecorun_dy_field_had_purchased':
+                case 'codecorun_dy_field_last_views':
+                case 'codecorun_dy_field_had_purchased':
+                case 'codecorun_dy_field_in_page':
+                case 'codecorun_dy_field_in_post':
+                    var get_type = index[0].split('codecorun_dy_field_');
+                    codecorun_por_generate_fields( codecorun_saved_rules[x], get_type[1], codecorun_field_label_payload[get_type[1]] );
+                    break;
+                case 'codecorun_por_url_param':
+                    break;
+            }
+        }
+        jQuery('.codecorun_por_no_values').hide();
+    }
+
 }

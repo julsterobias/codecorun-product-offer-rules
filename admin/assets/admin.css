@@ -89,3 +89,11 @@ select.codecorun_por_rules_select{
     padding: 10px 0;
     border: 1px solid #CCC;
 }
+
+.codecorun_por_admin_product_offer .select2{
+    width: 100% !important;
+}
+
+.codecorun_saved_data{
+    display: none;
+}

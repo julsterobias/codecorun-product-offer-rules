@@ -45,6 +45,14 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		add_action('wp_ajax_codecorun_offer_product_options',[$this,'codecorun_offer_product_options']);
 		add_action('wp_ajax_codecorun_offer_page_options',[$this,'codecorun_offer_page_options']);
 		add_action('wp_ajax_codecorun_offer_post_page_options',[$this, 'codecorun_offer_post_page_options']);
+		add_action('save_post_codecorun-por', [$this, 'save_rules']);
+
+		if(isset($_GET['por_debug'])){
+			print_r(get_post_meta($_GET['por_debug'],'codecorun-por-rules',true));
+			echo '===============<br/>';
+			print_r(get_post_meta($_GET['por_debug'],'codecorun-por-offers',true));
+			die();
+		}
     }
 
 	/**
@@ -56,10 +64,86 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	 */
 	public function assets()
 	{
+		global $pagenow;
+		$abort = false;
+
+		if( $pagenow == 'post.php' ){
+
+			if( !isset( $_GET['post'] ) && !isset( $_GET['action'] ) )
+				$abort = true;
+				
+			if( get_post_type($_GET['post']) != 'codecorun-por' )
+				$abort = true;
+
+		}elseif ( $pagenow == 'post-new.php' ){
+
+			if( !isset( $_GET['post_type'] ) )
+				$abort = true;
+
+			if( $_GET['post_type'] != 'codecorun-por' )
+				$abort = true;
+
+		}
+
+		if($abort)
+			return;
+
 		wp_register_script( CODECORUN_POR_PREFIX.'-admin-assets-js', CODECORUN_POR_URL.'admin/assets/admin.js', array('jquery') );
 		wp_enqueue_script( CODECORUN_POR_PREFIX.'-admin-assets-js' );
 		wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ))); 
         wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_nonce', wp_create_nonce('codecorun_por')); 
+
+		if( isset( $_GET['post'] ) ){
+			$post_id = sanitize_text_field($_GET['post']);
+			$offers = get_post_meta( $post_id, 'codecorun-por-offers', true );
+			$rules = get_post_meta( $post_id, 'codecorun-por-rules', true );
+			if( $offers ){
+				$offer_val = $this->get_post_details(
+					[
+						'post_type' => 'product',
+						'ids' => $offers
+					]
+				);
+				wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', json_encode($offer_val) ); 
+			}
+			if( $rules ){
+
+				
+				foreach( $rules as $index => $rule ){
+					$post_type = 'post';
+					$is_modified = false;
+					$new_index = explode( '-', $index );
+					switch( $new_index[0] ){
+						case 'codecorun_dy_field_in_cart_products':
+						case 'codecorun_dy_field_had_purchased':
+						case 'codecorun_dy_field_last_views':
+						case 'codecorun_dy_field_had_purchased':
+							$post_type = 'product';
+							$is_modified = true;
+						break;
+						case 'codecorun_dy_field_in_page':
+							$post_type = 'page';
+							$is_modified = true;
+						break;
+					}
+					$rule = ( is_array($rule) )? $rule : [$rule];
+					$offer_val = $this->get_post_details(
+						[
+							'post_type' => $post_type,
+							'ids' => $rule
+						]
+					);
+					if($is_modified)
+						$rules[$index] = $offer_val;
+				}
+				wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_rules', json_encode($rules) ); 
+			}
+		}else{
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', null ); 
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_rules', null ); 
+		}
+		
+
 		wp_enqueue_script('selectWoo');
 		wp_enqueue_style( 'woocommerce_admin_styles' );
 		wp_enqueue_style(CODECORUN_POR_PREFIX.'-admin-assets-css', CODECORUN_POR_URL.'admin/assets/admin.css');
@@ -162,9 +246,19 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	 */
 	public function meta_box()
 	{
+
+		add_meta_box(
+            'codecorun-por-meta-offer-products',
+            __('Products', 'codecorun-product-offer-rules'),
+            [$this,'meta_product_html'],
+            'codecorun-por',
+          	'normal',
+            'core'
+        );
+
 		add_meta_box(
             'codecorun-por-meta-offer',
-            __('Setup', 'codecorun-product-offer-rules'),
+            __('Rules', 'codecorun-product-offer-rules'),
             [$this,'meta_html'],
             'codecorun-por',
           	'normal',
@@ -174,6 +268,18 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 
 	}
 
+
+	/**
+	 * 
+	 * 
+	 * meta_product_html
+	 * 
+	 */
+	public function meta_product_html()
+	{
+		$this->set_template('product-setup',['other' => 'admin']);
+	}
+
 	/**
 	 * 
 	 * 
@@ -181,7 +287,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	 * 
 	 * 
 	 */
-	public function meta_html()
+	public function meta_html( $post )
 	{
 		$this->set_template('setup',['other' => 'admin']);
 	}
@@ -227,6 +333,81 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         
         echo json_encode($res);
         exit;
+	}
+
+	/**
+	 * 
+	 * save_rules
+	 * @since 1.0.1
+	 * @param int
+	 * 
+	 * 
+	 */
+	public function save_rules( $post_id ){
+
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+            return;
+
+
+        $offer_rules = (isset($_POST['codecorun_por_field']))? $_POST['codecorun_por_field'] : null;
+
+		// save product to offers
+		if( !empty($_POST['codecorun_por_product_offers']) ){
+			$to_offer = array_map( function($data){
+				return sanitize_text_field($data);
+			}, $_POST['codecorun_por_product_offers']);
+			update_post_meta( $post_id, 'codecorun-por-offers', $to_offer );
+		}else{
+			delete_post_meta( $post_id, 'codecorun-por-offers' );
+		}
+
+        if(!$offer_rules){
+            delete_post_meta($post_id,'codecorun-por-rules');
+            return;
+        }
+            
+
+        //let's sanitize
+        foreach($offer_rules as $index => $rules){
+            if(!is_array($rules)){
+                $offer_rules[$index] = sanitize_text_field($rules);
+            }else{
+                //reloop
+                //check index and do something for meta & params
+                foreach($rules as $i => $rule){
+                    $offer_rules[$index][$i] = sanitize_text_field($rule);
+                }
+            }
+        }
+
+        //reloop and check for index to reformat their data structure
+        foreach($offer_rules as $index => $rules){
+            $what_index = explode('-', $index);
+            if($what_index[0] == 'have_metas' || $what_index[0] == 'have_url_param'){
+                //do reformatting
+                $prev_key = null;
+                $new_format_ = [];
+                foreach($rules as $i => $rule){
+                    if($i % 2 == 0){
+                        $prev_key = $rule;
+                    }else{
+                        $meta_param = [
+                            'key' => $prev_key,
+                            'value' => $rule
+                        ];
+                        $new_format_[] = $meta_param;
+                        $meta_param = null;
+                        $prev_key = null;
+                    }
+                }
+                $offer_rules[$index] =  $new_format_;
+            } 
+        }
+
+        //save to post meta
+        if(!empty($offer_rules)){
+            update_post_meta($post_id,'codecorun-por-rules',$offer_rules);
+        }
 	}
 
 }

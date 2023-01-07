@@ -82,5 +82,38 @@ class codecorun_por_common_class
 		);
 	}
 
+	/**
+	 * 
+	 * get_post_details
+	 * @since 1.0.0
+	 * 
+	 */
+	public function get_post_details( $data = [] )
+	{
+		if( empty($data) )
+			return;
+
+		$args = [
+			'post_per_page' => -1,
+			'post_type' => ( isset($data['post_type']) )? $data['post_type'] : 'post',
+			'post__in' => $data['ids'],
+			'post_status' => 'active'
+		];
+		$posts = get_posts( $args );
+		if( !empty( $posts ) ){
+			$offer_val = [];
+			foreach($posts as $offer){
+				$offer_val[] = [
+					'id' => $offer->ID,
+					'title' => $offer->post_title
+				];
+			}
+			return $offer_val;
+		}
+		return;
+	}
+
+	
+
 
 }
