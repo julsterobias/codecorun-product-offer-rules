@@ -61,4 +61,6 @@ function codecorun_por_init(){
 	new codecorun\por\main\codecorun_por_main_class();	
 }
 
+//register widgets
+//include_once 'includes\codecorun-por-widget-class.php';
 ?>

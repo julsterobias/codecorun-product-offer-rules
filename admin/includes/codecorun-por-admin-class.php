@@ -9,6 +9,8 @@
 namespace codecorun\por\admin;
 use codecorun\por\common\codecorun_por_common_class;
 
+defined( 'ABSPATH' ) or die( 'No access area' );
+
 class codecorun_por_admin_class extends codecorun_por_common_class
 {
     private static $instance = null;
@@ -54,7 +56,6 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			die();
 		}
     }
-
 	/**
 	 * 
 	 * 
@@ -100,24 +101,32 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			$offers = get_post_meta( $post_id, 'codecorun-por-offers', true );
 			$rules = get_post_meta( $post_id, 'codecorun-por-rules', true );
 			if( $offers ){
-				$offer_val = $this->get_post_details(
-					[
-						'post_type' => 'product',
-						'ids' => $offers
-					]
-				);
-				wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', json_encode($offer_val) ); 
+				$offers = $this->prepare_offers_data( $offers );
+				$offers = json_encode( $offers );
+			}else{
+				$offers = null;
 			}
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', $offers ); 
 
 			if( $rules ){
 				$rules = $this->prepare_rules_data( $rules );
-				wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_rules', json_encode($rules) ); 
+
+				if( isset( $_GET['debug']) ){
+					print_r($rules);
+					die();
+				}
+				
+
+				$rules = json_encode( $rules );
+			}else{
+				$rules = null;
 			}
+			
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_rules', $rules ); 
 		}else{
 			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', null ); 
 			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_rules', null ); 
 		}
-		
 
 		wp_enqueue_script('selectWoo');
 		wp_enqueue_style( 'woocommerce_admin_styles' );
@@ -335,9 +344,12 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		}else{
 			delete_post_meta( $post_id, 'codecorun-por-offers' );
 		}
+		//reset cached
+		delete_transient('codecorun_por_offers_cached');
 
         if(!$offer_rules){
             delete_post_meta($post_id,'codecorun-por-rules');
+			delete_transient('codecorun_por_rules_cached');
             return;
         }
             
@@ -382,6 +394,8 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         //save to post meta
         if(!empty($offer_rules)){
             update_post_meta($post_id,'codecorun-por-rules',$offer_rules);
+			//reset cache
+			delete_transient('codecorun_por_rules_cached');
         }
 	}
 
@@ -401,61 +415,61 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		if( empty( $rules ) )
 			$rules;
 
-		$products_q = [];
-		$page_q = [];
-		$post_q = [];
+		if( get_transient('codecorun_por_rules_cached') ){
+			return get_transient('codecorun_por_rules_cached');
+		}
+
+		$all_ids = [];
 
 		foreach( $rules as $index => $rule ){
-			$post_type = 'post';
 			$new_index = explode( '-', $index );
 			switch( $new_index[0] ){
 				case 'codecorun_dy_field_in_cart_products':
 				case 'codecorun_dy_field_had_purchased':
 				case 'codecorun_dy_field_last_views':
 				case 'codecorun_dy_field_had_purchased':
+				case 'codecorun_dy_field_in_product_page':
 					if( is_array($rule) ){
 						foreach( $rule as $r ){
-							$products_q[] = $r;
+							$all_ids[] = $r;
 						}
 					}else{
-						$products_q[] = $rule;
+						$all_ids[] = $rule;
 					}
 				break;
 				case 'codecorun_dy_field_in_page':
 					if( is_array($rule) ){
 						foreach( $rule as $r ){
-							$page_q[] = $r;
+							$all_ids[] = $r;
 						}
 					}else{
-						$page_q[] = $rule;
+						$all_ids[] = $rule;
 					}
 				break;
 				case 'codecorun_dy_field_in_post':
 					if( is_array($rule) ){
 						foreach( $rule as $r ){
-							$post_q[] = $r;
+							$all_ids[] = $r;
 						}
 					}else{
-						$post_q[] = $rule;
+						$all_ids[] = $rule;
 					}
 				break;
 			}					
 		}
 
-		$index_q = [ 'product' => $products_q, 'page' => $page_q, 'post' => $post_q ];
-		$result = [];
-		//queried 3 times using post__in that's the best I can do for now to optimize the request
-		foreach( $index_q as $post_type => $iq ){
-			$result[$post_type] = $this->get_post_details(
-				[
-					'post_type' => $post_type,
-					'ids' => $iq
-				]
-			);
-		}
+		$post_types = ['product', 'post', 'page'];
+		$all_ids = array_unique( $all_ids );
+		$all_result = $this->get_post_details(
+			[
+				'post_type' => $post_types,
+				'ids' => $all_ids
+			]
+		);
+
 		//redistribute the result to their respected data
 		foreach( $rules as $index => $rule ){
-			$post_type = 'post';
+
 			$new_index = explode( '-', $index );
 			$is_modified = false;
 			$new_data = [];
@@ -464,15 +478,16 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 				case 'codecorun_dy_field_had_purchased':
 				case 'codecorun_dy_field_last_views':
 				case 'codecorun_dy_field_had_purchased':
-					$new_data = $this->data_seg( $rule, $result, 'product');
+				case 'codecorun_dy_field_in_product_page':
+					$new_data = $this->reassign_data( $rule, $all_result );
 					$is_modified = true;
 				break;
 				case 'codecorun_dy_field_in_page':
-					$new_data = $this->data_seg( $rule, $result, 'page');
+					$new_data = $this->reassign_data( $rule, $all_result );
 					$is_modified = true;
 				break;
 				case 'codecorun_dy_field_in_post':
-					$new_data = $this->data_seg( $rule, $result, 'post');
+					$new_data = $this->reassign_data( $rule, $all_result );
 					$is_modified = true;
 				break;
 			}	
@@ -482,6 +497,8 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			}
 		}
 		
+		set_transient('codecorun_por_rules_cached', $rules, '', 0);
+
 		return $rules;
 
 	}
@@ -489,7 +506,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	/**
 	 * 
 	 * 
-	 * data_seg
+	 * reassign_data
 	 * @since 1.0.0
 	 * @param array - meta result
 	 * @param array - queried result
@@ -497,12 +514,12 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	 * @return array
 	 * 
 	 */
-	public function data_seg( $rule, $result, $post_type )
+	public function reassign_data( $rule, $result )
 	{
 		$new_data = [];
 		if( is_array($rule) ){
 			foreach( $rule as $r ){
-				foreach( $result[ $post_type ] as $res ){
+				foreach( $result as $res ){
 					if( $r == $res['id'] ){
 						$new_data[] = [
 							'id' => $res['id'],
@@ -512,7 +529,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 				}
 			}
 		}else{
-			foreach( $result[ $post_type ] as $res ){
+			foreach( $result as $res ){
 				if( $rule == $res['id'] ){
 					$new_data[] = [
 						'id' => $res['id'],
@@ -523,6 +540,34 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		}
 
 		return $new_data;
+	}
+
+	/**
+	 * 
+	 * 
+	 * prepare_offers_data
+	 * @since 1.0.0
+	 * @param array
+	 * @return array
+	 * 
+	 * 
+	 */
+	public function prepare_offers_data( $offers )
+	{
+		if( get_transient('codecorun_por_offers_cached') ){
+			return get_transient('codecorun_por_offers_cached');
+		}
+
+		$offer_val = $this->get_post_details(
+			[
+				'post_type' => 'product',
+				'ids' => $offers
+			]
+		);
+
+		set_transient('codecorun_por_offers_cached', $offer_val, '', 0);
+
+		return $offer_val;
 	}
 
 }

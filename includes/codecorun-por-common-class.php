@@ -94,11 +94,12 @@ class codecorun_por_common_class
 			return;
 
 		$args = [
-			'post_per_page' => -1,
+			'numberposts' => -1,
 			'post_type' => ( isset($data['post_type']) )? $data['post_type'] : 'post',
 			'post__in' => $data['ids'],
-			'post_status' => 'active'
+			'post_status' => 'publish'
 		];
+
 		$posts = get_posts( $args );
 		if( !empty( $posts ) ){
 			$offer_val = [];

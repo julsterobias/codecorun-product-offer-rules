@@ -9,7 +9,7 @@
  */
 
 var codecorun_por_offer_container = '#codecorun_por_admin_offer';
-var codecorun_por_rule_container = '#codecorun_por_admin_rules';
+var codecorun_por_rule_container = '#codecorun_por_rules_container';
 var codecorun_por_product_container = '#codecorun_por_admin_product_offer';
 
 
@@ -206,7 +206,24 @@ var codecorun_init_to_rules_fields = function(){
 
     jQuery(no_rules_parent).append(no_rules_text);
     jQuery(codecorun_por_offer_container).append(rules_wrapper);
+
+    var rule_container = codecorun_por_elementor__(
+        {
+            type: 'div',
+            attributes: [
+                {
+                    attr: 'id',
+                    value: 'codecorun_por_rules_container'
+                }
+            ]
+        }
+    );
+
+    jQuery(codecorun_por_offer_container).append(rule_container);
     jQuery(codecorun_por_offer_container).append(no_rules_parent);
+
+
+    
     
 
 
@@ -410,7 +427,8 @@ function codecorun_por_init_selectwoo(field_class = null)
  */
  function codecorun_por_remove_first_condition()
  {
-     jQuery('#codecorun_por_admin_offer').find('.codecorun_por_rule_field').each(function(index){
+     jQuery('#codecorun_por_rules_container').find('.codecorun_por_rule_field').each(function(index){
+        
          if(index == 0){
              jQuery(this).find('.codecorun_por_rule_condition').remove();
          }
@@ -595,6 +613,7 @@ jQuery(document).ready(function(){
             jQuery(parent).remove();
             codecorun_check_rules_available();
         }
+        codecorun_por_remove_first_condition();
     });
 
     codecorun_render_saved_rules();
@@ -663,7 +682,7 @@ jQuery(document).ready(function(){
     );
     parent.appendChild(rule_label);
     rule_label.appendChild(el);
-    jQuery(codecorun_por_offer_container).append(parent);
+    jQuery(codecorun_por_rule_container).append(parent);
     codecorun_por_create_conditions(parent);
 }
 
@@ -789,7 +808,7 @@ var codecorun_por_render_date_range = function(values = []){
 
     label_to.appendChild(to);
     parent.appendChild(label_to);
-    jQuery(codecorun_por_offer_container).append(parent);
+    jQuery(codecorun_por_rule_container).append(parent);
     codecorun_por_create_conditions(parent);
 
 }
@@ -844,7 +863,7 @@ var codecorun_por_render_is_logged_in = function(user_id = 0, type = null){
     );
 
     jQuery(parent).append(field);
-    jQuery(codecorun_por_offer_container).append(parent);
+    jQuery(codecorun_por_rule_container).append(parent);
     codecorun_por_create_conditions(parent);
 }
 
@@ -936,7 +955,7 @@ var codecorun_por_generate_fields = function(products = [], type = '', attrs = n
 
     label.appendChild(select_products);
     parent.appendChild(label);
-    jQuery(codecorun_por_offer_container).append(parent);
+    jQuery(codecorun_por_rule_container).append(parent);
     codecorun_por_create_conditions(parent);
     codecorun_por_init_selectwoo(
         {
@@ -1130,7 +1149,7 @@ var codecorun_por_url_param = function( params = [], rule = '', attrs = []){
 
     parent.appendChild(el_label);
     parent.appendChild(el_field_wrapper);
-    jQuery(codecorun_por_offer_container).append(parent);
+    jQuery(codecorun_por_rule_container).append(parent);
     codecorun_por_create_conditions(parent);
 
 }
@@ -1179,8 +1198,10 @@ var codecorun_render_saved_offers = function ( type = '' )
 var codecorun_render_saved_rules = function ()
 {
     if( codecorun_saved_rules ){
-        var parent = jQuery(codecorun_por_offer_container);
+        
         codecorun_saved_rules = JSON.parse( codecorun_saved_rules );
+        var conditions = [];
+
         for( var x in codecorun_saved_rules ){
             var index = x.split( '-' );
             switch( index[0] ){
@@ -1199,14 +1220,23 @@ var codecorun_render_saved_rules = function ()
                 case 'codecorun_dy_field_had_purchased':
                 case 'codecorun_dy_field_in_page':
                 case 'codecorun_dy_field_in_post':
+                case 'codecorun_dy_field_in_product_page':
                     var get_type = index[0].split('codecorun_dy_field_');
                     codecorun_por_generate_fields( codecorun_saved_rules[x], get_type[1], codecorun_field_label_payload[get_type[1]] );
                     break;
-                case 'codecorun_por_url_param':
+                case 'have_url_param':
+                    codecorun_por_url_param( codecorun_saved_rules[x], index[0], codecorun_field_label_payload[ index[0] ] );
+                    break;
+                case 'condition':
+                    conditions.push( codecorun_saved_rules[x] );
                     break;
             }
         }
         jQuery('.codecorun_por_no_values').hide();
+
+        jQuery('#codecorun_por_rules_container').find('select.codecorun_por_condition_field').each(function(index){
+            jQuery(this).val(conditions[index]);
+        });
     }
 
 }
