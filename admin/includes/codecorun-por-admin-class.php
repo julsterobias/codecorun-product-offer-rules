@@ -67,6 +67,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		global $pagenow;
 		$abort = false;
 
+		//load assets in pages related to plugin only
 		if( $pagenow == 'post.php' ){
 
 			if( !isset( $_GET['post'] ) && !isset( $_GET['action'] ) )
@@ -94,6 +95,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_nonce', wp_create_nonce('codecorun_por')); 
 
 		if( isset( $_GET['post'] ) ){
+
 			$post_id = sanitize_text_field($_GET['post']);
 			$offers = get_post_meta( $post_id, 'codecorun-por-offers', true );
 			$rules = get_post_meta( $post_id, 'codecorun-por-rules', true );
@@ -106,36 +108,9 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 				);
 				wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', json_encode($offer_val) ); 
 			}
-			if( $rules ){
 
-				
-				foreach( $rules as $index => $rule ){
-					$post_type = 'post';
-					$is_modified = false;
-					$new_index = explode( '-', $index );
-					switch( $new_index[0] ){
-						case 'codecorun_dy_field_in_cart_products':
-						case 'codecorun_dy_field_had_purchased':
-						case 'codecorun_dy_field_last_views':
-						case 'codecorun_dy_field_had_purchased':
-							$post_type = 'product';
-							$is_modified = true;
-						break;
-						case 'codecorun_dy_field_in_page':
-							$post_type = 'page';
-							$is_modified = true;
-						break;
-					}
-					$rule = ( is_array($rule) )? $rule : [$rule];
-					$offer_val = $this->get_post_details(
-						[
-							'post_type' => $post_type,
-							'ids' => $rule
-						]
-					);
-					if($is_modified)
-						$rules[$index] = $offer_val;
-				}
+			if( $rules ){
+				$rules = $this->prepare_rules_data( $rules );
 				wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_rules', json_encode($rules) ); 
 			}
 		}else{
@@ -338,7 +313,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	/**
 	 * 
 	 * save_rules
-	 * @since 1.0.1
+	 * @since 1.0.0
 	 * @param int
 	 * 
 	 * 
@@ -408,6 +383,146 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         if(!empty($offer_rules)){
             update_post_meta($post_id,'codecorun-por-rules',$offer_rules);
         }
+	}
+
+
+	/**
+	 * 
+	 * 
+	 * prepare_rules_data
+	 * @since 1.0.0
+	 * @param array
+	 * @return array
+	 * 
+	 * 
+	 */
+	public function prepare_rules_data( $rules = [] )
+	{
+		if( empty( $rules ) )
+			$rules;
+
+		$products_q = [];
+		$page_q = [];
+		$post_q = [];
+
+		foreach( $rules as $index => $rule ){
+			$post_type = 'post';
+			$new_index = explode( '-', $index );
+			switch( $new_index[0] ){
+				case 'codecorun_dy_field_in_cart_products':
+				case 'codecorun_dy_field_had_purchased':
+				case 'codecorun_dy_field_last_views':
+				case 'codecorun_dy_field_had_purchased':
+					if( is_array($rule) ){
+						foreach( $rule as $r ){
+							$products_q[] = $r;
+						}
+					}else{
+						$products_q[] = $rule;
+					}
+				break;
+				case 'codecorun_dy_field_in_page':
+					if( is_array($rule) ){
+						foreach( $rule as $r ){
+							$page_q[] = $r;
+						}
+					}else{
+						$page_q[] = $rule;
+					}
+				break;
+				case 'codecorun_dy_field_in_post':
+					if( is_array($rule) ){
+						foreach( $rule as $r ){
+							$post_q[] = $r;
+						}
+					}else{
+						$post_q[] = $rule;
+					}
+				break;
+			}					
+		}
+
+		$index_q = [ 'product' => $products_q, 'page' => $page_q, 'post' => $post_q ];
+		$result = [];
+		//queried 3 times using post__in that's the best I can do for now to optimize the request
+		foreach( $index_q as $post_type => $iq ){
+			$result[$post_type] = $this->get_post_details(
+				[
+					'post_type' => $post_type,
+					'ids' => $iq
+				]
+			);
+		}
+		//redistribute the result to their respected data
+		foreach( $rules as $index => $rule ){
+			$post_type = 'post';
+			$new_index = explode( '-', $index );
+			$is_modified = false;
+			$new_data = [];
+			switch( $new_index[0] ){
+				case 'codecorun_dy_field_in_cart_products':
+				case 'codecorun_dy_field_had_purchased':
+				case 'codecorun_dy_field_last_views':
+				case 'codecorun_dy_field_had_purchased':
+					$new_data = $this->data_seg( $rule, $result, 'product');
+					$is_modified = true;
+				break;
+				case 'codecorun_dy_field_in_page':
+					$new_data = $this->data_seg( $rule, $result, 'page');
+					$is_modified = true;
+				break;
+				case 'codecorun_dy_field_in_post':
+					$new_data = $this->data_seg( $rule, $result, 'post');
+					$is_modified = true;
+				break;
+			}	
+			
+			if( $is_modified ){
+				$rules[ $index ] = $new_data;
+			}
+		}
+		
+		return $rules;
+
+	}
+
+	/**
+	 * 
+	 * 
+	 * data_seg
+	 * @since 1.0.0
+	 * @param array - meta result
+	 * @param array - queried result
+	 * @param string - post type
+	 * @return array
+	 * 
+	 */
+	public function data_seg( $rule, $result, $post_type )
+	{
+		$new_data = [];
+		if( is_array($rule) ){
+			foreach( $rule as $r ){
+				foreach( $result[ $post_type ] as $res ){
+					if( $r == $res['id'] ){
+						$new_data[] = [
+							'id' => $res['id'],
+							'title' => $res['title']
+						];
+					}
+				}
+			}
+		}else{
+			foreach( $result[ $post_type ] as $res ){
+				if( $rule == $res['id'] ){
+					$new_data[] = [
+						'id' => $res['id'],
+						'title' => $res['title']
+					];
+				}
+			}
+		}
+
+		return $new_data;
 	}
 
 }
