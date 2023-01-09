@@ -97,3 +97,11 @@ select.codecorun_por_rules_select{
 .codecorun_saved_data{
     display: none;
 }
+
+.codecorun_por_conditional{
+    display: none;
+}
+
+.codecorun_por_conditional.active{
+    display: block;
+}

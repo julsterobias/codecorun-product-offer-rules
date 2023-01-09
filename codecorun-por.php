@@ -3,7 +3,7 @@
  * 
  * Plugin Name: Codecorun - Product Offer Rules
  * Plugin URI: https://codecorun.com/plugins/product-offer-rules/
- * Description: A WooCommerce extension that will allow you to offer products according to rules
+ * Description: An ecommerce extension that will allow you to offer products according to rules
  * Author:      Codecorun
  * Plugin Type: Extension
  * Author URI: https://codecorun.com

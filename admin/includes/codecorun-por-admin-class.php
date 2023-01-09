@@ -100,23 +100,31 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			$post_id = sanitize_text_field($_GET['post']);
 			$offers = get_post_meta( $post_id, 'codecorun-por-offers', true );
 			$rules = get_post_meta( $post_id, 'codecorun-por-rules', true );
+			$fallback = get_post_meta( $post_id, 'codecorun-por-fallback', true);
+		
+
 			if( $offers ){
-				$offers = $this->prepare_offers_data( $offers );
+				$offers = $this->prepare_offers_data( $offers, $post_id );
 				$offers = json_encode( $offers );
 			}else{
 				$offers = null;
 			}
 			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', $offers ); 
+			
+			if( $fallback ){
+				$fallback = $this->prepare_offers_data( $fallback, $post_id, 'fallback' );
+				$fallback = json_encode( $fallback );
+			}else{
+				$fallback = null;
+			}
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_fallback', $fallback ); 
 
 			if( $rules ){
-				$rules = $this->prepare_rules_data( $rules );
-
+				$rules = $this->prepare_rules_data( $rules, $post_id );
 				if( isset( $_GET['debug']) ){
 					print_r($rules);
 					die();
 				}
-				
-
 				$rules = json_encode( $rules );
 			}else{
 				$rules = null;
@@ -249,7 +257,56 @@ class codecorun_por_admin_class extends codecorun_por_common_class
             'core'
         );
 
+		add_meta_box(
+            'codecorun-por-meta-offer-fallback',
+            __('Fallback offers', 'codecorun-product-offer-rules'),
+            [$this,'fallback_html'],
+            'codecorun-por',
+          	'normal',
+            'core'
+        );
 
+		add_meta_box(
+            'codecorun-por-meta-offer-settings',
+            __('Settings', 'codecorun-product-offer-rules'),
+            [$this,'setting_html'],
+            'codecorun-por',
+          	'side',
+            'high'
+        );
+
+
+	}
+
+	/**
+	 * 
+	 * setting_html
+	 * @since 1.0.0
+	 * 
+	 */
+	public function setting_html( $post )
+	{	
+		//check if has data
+		$rules = get_transient('codecorun_por_rules_cached-'.$post->ID);
+		$offers = get_transient('codecorun_por_offers_cached-'.$post->ID);
+		$shortcode = ( $rules && $offers )? '[codecorun-offers id="' . $post->ID . '"]' : '';
+
+		$settings = get_post_meta( $post->ID, 'codecorun_por_settings', true);
+		$this->set_template('product-settings',['other' => 'admin', 'shortcode' => $shortcode, 'settings' => $settings ]);
+	}
+
+
+	/**
+	 * 
+	 * 
+	 * fallback_html
+	 * @since 1.0.0
+	 * 
+	 * 
+	 */
+	public function fallback_html()
+	{
+		$this->set_template('fallback',['other' => 'admin']);
 	}
 
 
@@ -332,6 +389,19 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
 
+		//save settings
+		if(	isset( $_POST['codecorun_setting_field_enable_slider'] ) ){
+			$settings = [];
+			foreach( $_POST['codecorun_setting_field'] as $index => $set ){
+				if( !empty( $set ) ){
+					$settings[ $index ] = $set;
+				}
+			}
+			update_post_meta( $post_id, 'codecorun_por_settings', $settings );
+		}else{
+			delete_post_meta( $post_id, 'codecorun_por_settings' );
+		}
+
 
         $offer_rules = (isset($_POST['codecorun_por_field']))? $_POST['codecorun_por_field'] : null;
 
@@ -345,7 +415,21 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			delete_post_meta( $post_id, 'codecorun-por-offers' );
 		}
 		//reset cached
-		delete_transient('codecorun_por_offers_cached');
+		delete_transient('codecorun_por_offers_cached-'.$post_id);
+
+
+		// save product to fallback
+		if( !empty($_POST['codecorun_por_product_fallback']) ){
+			$to_offer = array_map( function($data){
+				return sanitize_text_field($data);
+			}, $_POST['codecorun_por_product_fallback']);
+			update_post_meta( $post_id, 'codecorun-por-fallback', $to_offer );
+		}else{
+			delete_post_meta( $post_id, 'codecorun-por-fallback' );
+		}
+		//reset cached
+		delete_transient('codecorun_por_fallback_cached-'.$post_id);
+		
 
         if(!$offer_rules){
             delete_post_meta($post_id,'codecorun-por-rules');
@@ -395,8 +479,9 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         if(!empty($offer_rules)){
             update_post_meta($post_id,'codecorun-por-rules',$offer_rules);
 			//reset cache
-			delete_transient('codecorun_por_rules_cached');
+			delete_transient('codecorun_por_rules_cached-'.$post_id);
         }
+		
 	}
 
 
@@ -410,13 +495,13 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	 * 
 	 * 
 	 */
-	public function prepare_rules_data( $rules = [] )
+	public function prepare_rules_data( $rules = [], $post_id )
 	{
 		if( empty( $rules ) )
 			$rules;
 
-		if( get_transient('codecorun_por_rules_cached') ){
-			return get_transient('codecorun_por_rules_cached');
+		if( get_transient('codecorun_por_rules_cached-'.$post_id) ){
+			return get_transient('codecorun_por_rules_cached-'.$post_id);
 		}
 
 		$all_ids = [];
@@ -497,7 +582,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			}
 		}
 		
-		set_transient('codecorun_por_rules_cached', $rules, '', 0);
+		set_transient('codecorun_por_rules_cached-'.$post_id, $rules, '', 0);
 
 		return $rules;
 
@@ -552,10 +637,10 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	 * 
 	 * 
 	 */
-	public function prepare_offers_data( $offers )
+	public function prepare_offers_data( $offers, $post_id, $type = 'offers' )
 	{
-		if( get_transient('codecorun_por_offers_cached') ){
-			return get_transient('codecorun_por_offers_cached');
+		if( get_transient('codecorun_por_'.$type.'_cached-'.$post_id) ){
+			return get_transient('codecorun_por_'.$type.'_cached-'.$post_id);
 		}
 
 		$offer_val = $this->get_post_details(
@@ -565,7 +650,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			]
 		);
 
-		set_transient('codecorun_por_offers_cached', $offer_val, '', 0);
+		set_transient('codecorun_por_'.$type.'_cached-'.$post_id, $offer_val, '', 0);
 
 		return $offer_val;
 	}

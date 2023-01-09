@@ -19,7 +19,18 @@ var codecorun_por_product_container = '#codecorun_por_admin_product_offer';
  * @since 1.0.0
  * 
  */
-var codecorun_init_to_offer_fields = function(){
+var codecorun_init_to_offer_fields = function( type = '' ){
+
+
+    var name_ = 'codecorun_por_product_offers[]';
+    var id_ = 'codecorun_por_options';
+    var parent_ = codecorun_por_product_container;
+
+    if( type == 'fallback' ){
+        name_ = 'codecorun_por_product_fallback[]';
+        id_ = 'codecorun_por_options_fallback';
+        parent_ = '#codecorun_por_admin_fallback';
+    }
     
     var offer_wrapper = codecorun_por_elementor__(
         {
@@ -46,7 +57,7 @@ var codecorun_init_to_offer_fields = function(){
         attributes: [
             {
                 attr: 'id',
-                value: 'codecorun_por_options'
+                value: id_
             },
             {
                 attr: 'class',
@@ -58,12 +69,17 @@ var codecorun_init_to_offer_fields = function(){
             },
             {
                 attr: 'name',
-                value: 'codecorun_por_product_offers[]'
+                value: name_
             }
         ]
     };
 
-    var options_fields = codecorun_render_saved_offers( 'offers' );
+    if( type == 'fallback' ){
+        var options_fields = codecorun_render_saved_offers( 'fallback' );
+    }else{
+        var options_fields = codecorun_render_saved_offers( 'offers' );
+    }
+    
 
     if( options_fields ){
         if( options_fields.option_fields ){
@@ -77,12 +93,12 @@ var codecorun_init_to_offer_fields = function(){
     //generate elements
     var offer_select = codecorun_por_elementor__( field_attributes );
     offer_header.appendChild(offer_select);
-    jQuery(codecorun_por_product_container).append(offer_wrapper);
+    jQuery(parent_).append(offer_wrapper);
     
     //init select2
     codecorun_por_init_selectwoo(
         {
-            el: '#codecorun_por_options',
+            el: '#' + id_,
             action: 'codecorun_offer_post_page_options',
             placeholder: 'Select product',
             post_type: 'product'
@@ -540,6 +556,7 @@ var codecorun_field_label_payload = {
 jQuery(document).ready(function(){
     //initialize fields
     codecorun_init_to_offer_fields();
+    codecorun_init_to_offer_fields( 'fallback' );
     codecorun_init_to_rules_fields();
 
     jQuery('#codecorun_por_add_rules').click( function(){
@@ -618,6 +635,10 @@ jQuery(document).ready(function(){
 
     codecorun_render_saved_rules();
 
+    jQuery('.codecorun_por_enable_carousel').click(function(){
+        jQuery('.codecorun_por_conditional').toggleClass('active');
+    });
+
 });
 
 
@@ -654,7 +675,7 @@ jQuery(document).ready(function(){
 
     codecorun_por_add_tooltip({
         parent: rule_label,
-        text: 'Date Tooltip'
+        text: 'Display offers if today\'s date is the date selected'
     });
 
     var el = codecorun_por_elementor__(
@@ -723,7 +744,7 @@ var codecorun_por_render_date_range = function(values = []){
 
     codecorun_por_add_tooltip({
         parent: rule_label,
-        text: 'Date Range Tooltip'
+        text: 'Display offers if the date today is within the date range selected'
     });
 
     parent.appendChild(rule_label);
@@ -1085,7 +1106,7 @@ var codecorun_por_url_param = function( params = [], rule = '', attrs = []){
                     attributes: [
                         {
                             attr: 'width',
-                            value: '45%'
+                            value: '44%'
                         }
                     ]
                 }
@@ -1100,7 +1121,7 @@ var codecorun_por_url_param = function( params = [], rule = '', attrs = []){
                 attributes: [
                     {
                         attr: 'width',
-                        value: '10%'
+                        value: '6%'
                     }
                 ]
             }  
@@ -1185,6 +1206,23 @@ var codecorun_render_saved_offers = function ( type = '' )
                 }
             );
             options_selected.push( codecorun_saved_offers[x].id );
+        }
+        return {
+            option_fields: options,
+            selected: options_selected
+        };
+   }else{
+    codecorun_saved_fallback = JSON.parse( codecorun_saved_fallback );
+        var options = [];
+        var options_selected = [];
+        for(var x in codecorun_saved_fallback){
+            options.push(
+                {
+                    text: codecorun_saved_fallback[x].title,
+                    value: codecorun_saved_fallback[x].id
+                }
+            );
+            options_selected.push( codecorun_saved_fallback[x].id );
         }
         return {
             option_fields: options,
