@@ -5,8 +5,8 @@
 
 .codecorun_por_rule_field{
     border-top: 1px solid #CCC;
-    padding-top: 20px;
-    padding-bottom: 40px;
+    padding-top: 40px;
+    padding-bottom: 60px;
     position: relative;
 }
 
@@ -57,7 +57,7 @@
 
 .codecorun_por_rule_condition{
     position: absolute;
-    margin-top: -35px;
+    margin-top: -55px;
     background: white;
     left: 50%;
     transform: translateX(-50%);

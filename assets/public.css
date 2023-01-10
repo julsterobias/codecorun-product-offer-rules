@@ -1,0 +1,23 @@
+.codecorun-por-attrs{
+    display: block;
+}
+.codecorun-por-list{
+    margin: 0;
+    padding: 0;
+}
+.codecorun-por-list li{
+    list-style: none;
+    margin-bottom: 15px;
+}
+
+.codecorun-por-style-inline{
+    margin: 0 -15px;
+}
+.codecorun-por-style-inline li{
+    display: inline-block;
+    width: 250px;
+}
+
+.codecorun-por-style-inline li div{
+    padding: 0 15px;
+}

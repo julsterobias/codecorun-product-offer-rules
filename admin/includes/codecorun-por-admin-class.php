@@ -389,15 +389,31 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
 
+		$offer_settings = [];
+		
+		if( isset( $_POST['codecorun_setting_offer_title'] ) ){
+			$offer_settings['offer_tile'] = sanitize_text_field( $_POST['codecorun_setting_offer_title'] );
+		}
+
 		//save settings
 		if(	isset( $_POST['codecorun_setting_field_enable_slider'] ) ){
 			$settings = [];
 			foreach( $_POST['codecorun_setting_field'] as $index => $set ){
 				if( !empty( $set ) ){
-					$settings[ $index ] = $set;
+					$settings[ $index ] = sanitize_text_field( $set );
 				}
 			}
-			update_post_meta( $post_id, 'codecorun_por_settings', $settings );
+			//update_post_meta( $post_id, 'codecorun-por-slider-settings', $settings );
+			$offer_settings[ 'codecorun_por_slider_settings' ] = $settings;
+		}else{
+			//delete_post_meta( $post_id, 'codecorun-por-slider-settings' );
+			if( isset( $offer_settings[ 'codecorun_por_slider_settings' ] ) ){
+				unset( $offer_settings[ 'codecorun_por_slider_settings' ] );
+			}
+		}
+
+		if( !empty( $offer_settings ) ){
+			update_post_meta( $post_id, 'codecorun_por_settings', $offer_settings);
 		}else{
 			delete_post_meta( $post_id, 'codecorun_por_settings' );
 		}

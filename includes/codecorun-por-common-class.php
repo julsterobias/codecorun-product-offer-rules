@@ -104,10 +104,24 @@ class codecorun_por_common_class
 		if( !empty( $posts ) ){
 			$offer_val = [];
 			foreach($posts as $offer){
+				
+				//get other details
+				if( $data['post_type'] == 'product' ){
+					$product = wc_get_product( $offer->ID );
+				}
+				
+				$image = wp_get_attachment_image_src( get_post_thumbnail_id( $offer->ID ), 'medium' );
+
 				$offer_val[] = [
 					'id' => $offer->ID,
-					'title' => $offer->post_title
+					'title' => $offer->post_title,
+					'image' => ( isset( $image[0] ) )? $image[0] : null
 				];
+
+				if( $data['post_type'] == 'product' ){
+					$offer_val['price'] = $product->get_price_html();
+				}
+
 			}
 			return $offer_val;
 		}
