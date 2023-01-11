@@ -35,8 +35,9 @@ class codecorun_por_main_class extends codecorun_por_common_class
 
         add_shortcode( 'codecorun-offers', [$this, 'offers'] );
         add_action( 'template_redirect', [$this, 'last_view'] );
-        add_action( 'woocommerce_payment_complete', [$this, 'clear_purchased'], 10, 2);        
+        add_action( 'woocommerce_payment_complete', [$this, 'clear_purchased'], 10, 2);   
     }
+
 
     /**
      * 
@@ -120,6 +121,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
             return;
         }
 
+        $style = ( isset($attr['style']) )? $attr['style'] : null;
+
         //check the rules
         $rules = get_transient('codecorun_por_rules_cached-'.$attr['id']);
         $result = $this->check_rules( $rules );
@@ -130,7 +133,6 @@ class codecorun_por_main_class extends codecorun_por_common_class
 
             if( !empty( $offers ) ){
                 $settings = get_post_meta( $attr['id'], 'codecorun_por_settings', true);
-                $style = ( isset($attr['style']) )? $attr['style'] : null;
                 ob_start();
                 $this->set_template('offer', ['offers' => $offers, 'settings' => $settings, 'style' => $style, 'id' => sanitize_text_field( $attr['id'] ) ] );
                 return ob_get_clean();
@@ -139,6 +141,15 @@ class codecorun_por_main_class extends codecorun_por_common_class
                 return;
             }
             
+        }else{
+            //load fallback
+            $fallback = get_transient( 'codecorun_por_fallback_cached-'.$attr['id'] ); 
+            if( !empty( $fallback ) ){
+                $settings = get_post_meta( $attr['id'], 'codecorun_por_settings', true);
+                ob_start();
+                $this->set_template('offer', ['offers' => $fallback, 'settings' => $settings, 'style' => $style, 'id' => sanitize_text_field( $attr['id'] ) ] );
+                return ob_get_clean();
+            }
         }
         
     }
