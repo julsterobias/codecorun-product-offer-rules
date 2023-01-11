@@ -34,6 +34,50 @@ class codecorun_por_main_class extends codecorun_por_common_class
             $this->load_assets();
 
         add_shortcode( 'codecorun-offers', [$this, 'offers'] );
+        add_action( 'template_redirect', [$this, 'last_view'] );
+        add_action( 'woocommerce_payment_complete', [$this, 'clear_purchased'], 10, 2);
+    }
+
+    /**
+     * 
+     * clear_purchased
+     * 
+     */
+    public function clear_purchased( $order_id, $order )
+    {
+        $user_id = get_post_meta($order_id, '_customer_user', true);
+        if( isset( $user_id ) ){
+            //reset user's cached purchased IDs
+            wp_cache_get('codecorun_cached_purchased-'.$user_id);
+        }
+    }
+
+    /**
+     * 
+     * 
+     * last_view
+     * @since 1.0.0
+     * @param
+     * @return
+     * 
+     */
+    public function last_view()
+    {
+        global $post;
+        if( is_single() && get_post_type( $post->ID ) == 'product' ){
+
+           if( !isset( $_COOKIE[ 'codecorun_recent_prod_viewed' ] ) ){
+                //set for 1 day
+                $viewed = implode( [$post->ID] );
+                setcookie( 'codecorun_recent_prod_viewed', $viewed, time()+86400, '/' );
+           }else{
+                $viewed = explode(',', $_COOKIE['codecorun_recent_prod_viewed'] );
+                $viewed[] = $post->ID;
+                $viewed = array_unique( $viewed );
+                //update cookie
+                setcookie( 'codecorun_recent_prod_viewed', implode(',', $viewed ), time()+86400, '/' );
+           }
+        }
     }
 
     /**
@@ -72,17 +116,7 @@ class codecorun_por_main_class extends codecorun_por_common_class
         $rules = get_transient('codecorun_por_rules_cached-'.$attr['id']);
         $result = $this->check_rules( $rules );
 
-        print_r( $result );
-
-        /**
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         */
+        //print_r( $result );
         
         $offers = get_transient('codecorun_por_offers_cached-'.$attr['id']);
 
@@ -140,6 +174,15 @@ class codecorun_por_main_class extends codecorun_por_common_class
                 case 'codecorun_dy_field_in_post':
                     $cond_value[] = $this->in_page_post( $rule );
                     break;
+                case 'codecorun_dy_field_last_views':
+                    $cond_value[] = $this->last_viewed( $rule );
+                    break;
+                case 'codecorun_dy_field_had_purchased':
+                    $cond_value[] = $this->had_purchased( $rule );
+                    break;
+                case 'have_url_param':
+                    $cond_value[] = $this->have_url( $rule );
+                    break;
 
             }
         endforeach;
@@ -148,7 +191,14 @@ class codecorun_por_main_class extends codecorun_por_common_class
         
     }
 
-
+    /**
+     * 
+     * 
+     * date
+     * @since 1.0.0
+     * 
+     * 
+     */
     public function date( $args = [] )
     {   
         if( empty( $args ) )
@@ -171,6 +221,14 @@ class codecorun_por_main_class extends codecorun_por_common_class
         }
     }
 
+    /**
+     * 
+     * 
+     * in_cart_products
+     * @since 1.0.0
+     * 
+     * 
+     */
     public function in_cart_products( $rules )
     {
         global $woocommerce;
@@ -190,6 +248,15 @@ class codecorun_por_main_class extends codecorun_por_common_class
         return ( $in_cart == count( $rules ) )? 1 : 0;
     }
 
+
+    /**
+     * 
+     * 
+     * in_product_page
+     * @since 1.0.0
+     * 
+     * 
+     */
     public function in_product_page( $rules )
     {
         global $post;
@@ -197,11 +264,27 @@ class codecorun_por_main_class extends codecorun_por_common_class
         
     }
 
+    /**
+     * 
+     * 
+     * is_logged_in
+     * @since 1.0.0
+     * 
+     * 
+     */
     public function is_logged_in()
     {
         return ( is_user_logged_in() )?  1 : 0;
     }
 
+    /**
+     * 
+     * 
+     * in_page_post
+     * @since 1.0.0
+     * 
+     * 
+     */
     public function in_page_post( $rules )
     {
         global $post;
@@ -212,6 +295,85 @@ class codecorun_por_main_class extends codecorun_por_common_class
             }
         }
         return 0;
+    }
+
+    /**
+     * 
+     * 
+     * last_viewed
+     * @since 1.0.0
+     * 
+     * 
+     */
+    public function last_viewed( $rules )
+    {
+        $last_cookie = ( isset( $_COOKIE['codecorun_recent_prod_viewed'] ) )? $_COOKIE['codecorun_recent_prod_viewed'] : null;
+        if( $last_cookie ){
+            $last_cookie = explode(',', $last_cookie);
+            foreach( $rules as $rule ){
+                if( in_array( $rule['id'], $last_cookie ) ){
+                    return 1;
+                }
+            }
+        }else{
+            return 0;
+        }
+    }
+
+    /**
+     * 
+     * 
+     * had_purchased
+     * @since 1.0.0
+     * 
+     * 
+     */
+    public function had_purchased( $rules )
+    {
+        $res = $this->get_purchased_by_user();
+
+        foreach( $rules as $rule ){
+            if( in_array( $rule['id'], $res) ){
+                return 1;
+                break;
+            }
+        }
+        return 0;
+
+    }
+
+    /**
+     * 
+     * 
+     * have_url
+     * @since 1.0.0
+     * 
+     * 
+     */
+    public function have_url( $rules )
+    {
+        $params = $_GET;
+        if( !empty( $params ) ){
+            
+            $it_has = 0;
+            foreach( $params as $index => $param ){
+                foreach( $rules as $rule ){
+                    $param_ = sanitize_text_field( $param );
+                    if( $rule['key'] == $index && $rule['value'] == $param_ ){
+                        $it_has++;
+                    }
+                }
+            }
+
+            if( count( $rules ) == $it_has )
+                return 1;
+            else
+                return 0;
+
+        }else{
+            return 0;
+        }
+
     }
 
 

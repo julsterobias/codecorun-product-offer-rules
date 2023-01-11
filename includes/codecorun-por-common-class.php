@@ -131,4 +131,55 @@ class codecorun_por_common_class
 	}	
 
 
+	/**
+	 * 
+	 * get_purchased_by_user
+	 * @since 1.0.0
+	 * @param
+	 * @return
+	 * 
+	 */
+	public function get_purchased_by_user()
+	{
+		
+		$current_user = wp_get_current_user();
+		
+		if( 0 == $current_user->ID ) 
+			return;
+
+		$cached_ids = wp_cache_get('codecorun_cached_purchased-'.$current_user->ID);
+
+		if( $cached_ids ){
+			return $cached_ids;
+		}else{
+
+			$args = array(
+				'numberposts' => -1,
+				'meta_key' => '_customer_user',
+				'meta_value' => $current_user->ID,
+				'post_type' => wc_get_order_types(),
+				'post_status' => array_keys( wc_get_is_paid_statuses() ),
+			);
+	 
+			$customer_orders = get_posts( $args);
+	
+			$product_ids = [];
+			if( !empty( $customer_orders ) ){	
+				foreach ( $customer_orders as $customer_order ) {
+					$order = wc_get_order( $customer_order->ID );
+					$items = $order->get_items();
+					foreach ( $items as $item ) {
+						$product_id = $item->get_product_id();
+						$product_ids[] = $product_id;
+					}
+				}
+			}
+			wp_cache_set('codecorun_cached_purchased-'.$current_user->ID, $product_ids);
+			return $product_ids;
+
+		}
+		
+	}
+
+
 }

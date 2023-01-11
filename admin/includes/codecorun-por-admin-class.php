@@ -407,10 +407,8 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 					$settings[ $index ] = sanitize_text_field( $set );
 				}
 			}
-			//update_post_meta( $post_id, 'codecorun-por-slider-settings', $settings );
 			$offer_settings[ 'codecorun_por_slider_settings' ] = $settings;
 		}else{
-			//delete_post_meta( $post_id, 'codecorun-por-slider-settings' );
 			if( isset( $offer_settings[ 'codecorun_por_slider_settings' ] ) ){
 				unset( $offer_settings[ 'codecorun_por_slider_settings' ] );
 			}

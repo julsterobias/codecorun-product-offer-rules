@@ -591,6 +591,8 @@ jQuery(document).ready(function(){
 
         codecorun_check_rules_available();
 
+        jQuery("html, body").animate({ scrollTop: jQuery(document).height() }, 1000);
+
     } );
 
 
