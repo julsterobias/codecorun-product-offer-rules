@@ -1198,6 +1198,7 @@ var codecorun_render_saved_offers = function ( type = '' )
         codecorun_saved_offers = JSON.parse( codecorun_saved_offers );
         var options = [];
         var options_selected = [];
+        console.log( codecorun_saved_offers );
         for(var x in codecorun_saved_offers){
             options.push(
                 {

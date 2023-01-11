@@ -112,23 +112,23 @@ class codecorun_por_common_class
 				
 				$image = wp_get_attachment_image_src( get_post_thumbnail_id( $offer->ID ), 'medium' );
 
-				$offer_val[] = [
+				$offer_d = [
 					'id' => $offer->ID,
 					'title' => $offer->post_title,
 					'image' => ( isset( $image[0] ) )? $image[0] : null
 				];
 
 				if( $data['post_type'] == 'product' ){
-					$offer_val['price'] = $product->get_price_html();
+					$offer_d['price'] = $product->get_price_html();
 				}
+
+				$offer_val[] = $offer_d;
 
 			}
 			return $offer_val;
 		}
 		return;
-	}
-
-	
+	}	
 
 
 }

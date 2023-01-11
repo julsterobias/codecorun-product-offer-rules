@@ -43,7 +43,10 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		add_filter('manage_codecorun-por_posts_columns' , [$this, 'table_tabs']);
 		add_action('manage_codecorun-por_posts_custom_column', [$this,'table_tabs_content'], 10, 2 );
 		add_action('add_meta_boxes',[$this,'meta_box']);
-		add_action('admin_enqueue_scripts',[$this, 'assets']);
+
+		if( is_admin() )
+			add_action('admin_enqueue_scripts',[$this, 'assets']);
+
 		add_action('wp_ajax_codecorun_offer_product_options',[$this,'codecorun_offer_product_options']);
 		add_action('wp_ajax_codecorun_offer_page_options',[$this,'codecorun_offer_page_options']);
 		add_action('wp_ajax_codecorun_offer_post_page_options',[$this, 'codecorun_offer_post_page_options']);
@@ -134,6 +137,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		}else{
 			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_offers', null ); 
 			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_rules', null ); 
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_saved_fallback', null ); 
 		}
 
 		wp_enqueue_script('selectWoo');
