@@ -35,7 +35,7 @@ class codecorun_por_main_class extends codecorun_por_common_class
 
         add_shortcode( 'codecorun-offers', [$this, 'offers'] );
         add_action( 'template_redirect', [$this, 'last_view'] );
-        add_action( 'woocommerce_payment_complete', [$this, 'clear_purchased'], 10, 2);
+        add_action( 'woocommerce_payment_complete', [$this, 'clear_purchased'], 10, 2);        
     }
 
     /**
@@ -90,6 +90,15 @@ class codecorun_por_main_class extends codecorun_por_common_class
     public function load_assets()
     {
         wp_enqueue_style(CODECORUN_POR_PREFIX.'-public-assets-css', CODECORUN_POR_URL.'assets/public.css');
+
+        //load slick assets
+        wp_enqueue_style(CODECORUN_POR_PREFIX.'-slick-css', CODECORUN_POR_URL.'assets/slick-slider/slick.css');
+        wp_register_script( CODECORUN_POR_PREFIX.'-slick-js', CODECORUN_POR_URL.'assets/slick-slider/slick-min.js', array('jquery') );
+		wp_enqueue_script( CODECORUN_POR_PREFIX.'-slick-js' );
+        
+        //get settings for slider
+        wp_add_inline_script( CODECORUN_POR_PREFIX.'-slick-js', 'jQuery(window).on("load",function(){if(jQuery("ul.codecorun-por-slick").length>0){var e=[],i=[];if(jQuery("ul.codecorun-por-slick").each(function(){var o=jQuery(this).data("slide-post-per-page"),a=jQuery(this).data("slide-delay"),d=jQuery(this).data("slide-animation"),s="codecorun-por-slick-"+jQuery(this).data("slide-id"),l={prevArrow:!1,nextArrow:!1,autoplay:!0};"fade"!=d?l.slidesToShow=o:l.slidesToShow=1,a&&(l.speed=a),"fade"==d&&(l.fade=!0),e.includes(s)||(e.push(s),i.push(l))}),e.length>0)for(var o in e)jQuery("ul."+e[o]).slick(i[o])}});' );
+        
     }
 
 
@@ -98,7 +107,7 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * offers
      * @since 1.0.0
-     * @param
+     * @param array
      * @return
      * 
      * 
@@ -111,26 +120,25 @@ class codecorun_por_main_class extends codecorun_por_common_class
             return;
         }
 
-
         //check the rules
         $rules = get_transient('codecorun_por_rules_cached-'.$attr['id']);
         $result = $this->check_rules( $rules );
-
-        //print_r( $result );
         
-        $offers = get_transient('codecorun_por_offers_cached-'.$attr['id']);
+        if( $result ){
+            
+            $offers = get_transient('codecorun_por_offers_cached-'.$attr['id']);
 
-        $settings = get_post_meta( $attr['id'], 'codecorun_por_settings', true);
-
-        $style = ( isset($attr['style']) )? $attr['style'] : null;
-        
-        if( !empty( $offers ) ){
-            ob_start();
-                $this->set_template('offer', ['offers' => $offers, 'settings' => $settings, 'style' => $style ] );
-            return ob_get_clean();
-        }else{
-            error_log( __('Codecorun Error: No offer is found', 'codecorun-product-offer-rules') );
-            return;
+            if( !empty( $offers ) ){
+                $settings = get_post_meta( $attr['id'], 'codecorun_por_settings', true);
+                $style = ( isset($attr['style']) )? $attr['style'] : null;
+                ob_start();
+                $this->set_template('offer', ['offers' => $offers, 'settings' => $settings, 'style' => $style, 'id' => sanitize_text_field( $attr['id'] ) ] );
+                return ob_get_clean();
+            }else{
+                error_log( __('Codecorun Error: No offer is found', 'codecorun-product-offer-rules') );
+                return;
+            }
+            
         }
         
     }
@@ -140,6 +148,9 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * 
      * check_rules
+     * @since 1.0.0
+     * @param array - set of rules
+     * @return bool
      * 
      * 
      */
@@ -183,11 +194,104 @@ class codecorun_por_main_class extends codecorun_por_common_class
                 case 'have_url_param':
                     $cond_value[] = $this->have_url( $rule );
                     break;
+                case 'condition':
+                    $cond_value[] = ($rule == 'and')? '&&' : '||';
+                    break;
+                    
 
             }
         endforeach;
 
-        return $cond_value;
+
+
+        //format collection for OR condition to group them together.
+        foreach($cond_value as $i => $con){
+
+            if($con == '||'){
+                $in = $i;
+                $in--;
+                $new_val_prev = $cond_value[$in];
+
+                if(is_numeric($new_val_prev))
+                    $new_val_prev = '('.$new_val_prev;
+                else
+                    $new_val_prev = str_replace(['(',')'],'',$new_val_prev);
+                
+                $cond_value[$in] = $new_val_prev;
+                $in_ = $i;
+                $in_++;
+                $new_val_nex = $cond_value[$in_];
+
+                if(is_numeric($new_val_nex))
+                    $new_val_nex = $new_val_nex.')';
+                else
+                    $new_val_nex = str_replace(['(',')'],'',$new_val_nex);
+
+                $cond_value[$in_] = $new_val_nex;
+            }
+
+        }
+
+        $grouped_range = [];
+        $grouped_break_points = [];
+        foreach($cond_value as $index => $_rule_){
+            if(!is_numeric($_rule_) && $_rule_ != '&&'){
+                if(strpos($_rule_,'(') !== false){
+                    $grouped_break_points[] = $index;
+                }
+                if(strpos($_rule_,')') !== false){
+                    $grouped_break_points[] = $index;
+                    $grouped_range[] = $grouped_break_points;
+                    $grouped_break_points = [];
+                }
+            }
+        }
+
+        //get the grouped and evaluate
+        $grouped_results = [];
+        foreach($grouped_range as $range){
+
+            $range_1 = $range[0];
+            $range_2 = $range[1];
+            $is_first = 0;
+            $g_index = null;
+            $g_result = 0;
+
+            for($x = $range_1; $x <= $range_2; $x++){
+                if(!is_numeric($cond_value[$x]) && $cond_value[$x] != '||'){
+                    $value = (int) str_replace(['(',')'],'',$cond_value[$x]);
+                }else{
+                    $value = $cond_value[$x];
+                }
+                if($value == 1){
+                    $g_result = 1;
+                }
+                if($is_first > 0){
+                    unset($cond_value[$x]);
+                }else{
+                    $g_index = $x;
+                }
+                $is_first++;
+            }
+
+            $grouped_results[$g_index] = $g_result;
+            
+        }
+
+        //re_assign grouped result rules 
+        foreach($grouped_results as $index => $result_){
+            $cond_value[$index] = $result_;
+        }
+        
+        //evaluate the 'and' operation
+        $apply_offer = true;
+        foreach($cond_value as $result_and){
+            if($result_and == 0){
+                $apply_offer = false;
+            }
+        }
+
+        return $apply_offer;
         
     }
 
@@ -196,6 +300,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * date
      * @since 1.0.0
+     * @param array
+     * @return int
      * 
      * 
      */
@@ -226,6 +332,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * in_cart_products
      * @since 1.0.0
+     * @param array
+     * @return int
      * 
      * 
      */
@@ -254,6 +362,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * in_product_page
      * @since 1.0.0
+     * @param array
+     * @return int
      * 
      * 
      */
@@ -269,6 +379,7 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * is_logged_in
      * @since 1.0.0
+     * @return int
      * 
      * 
      */
@@ -282,7 +393,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * in_page_post
      * @since 1.0.0
-     * 
+     * @param array
+     * @return int
      * 
      */
     public function in_page_post( $rules )
@@ -302,6 +414,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * last_viewed
      * @since 1.0.0
+     * @param array
+     * @return int
      * 
      * 
      */
@@ -325,6 +439,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * had_purchased
      * @since 1.0.0
+     * @param array
+     * @return int
      * 
      * 
      */
@@ -347,6 +463,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
      * 
      * have_url
      * @since 1.0.0
+     * @param array
+     * @return int
      * 
      * 
      */

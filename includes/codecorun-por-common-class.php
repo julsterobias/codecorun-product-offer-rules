@@ -86,6 +86,8 @@ class codecorun_por_common_class
 	 * 
 	 * get_post_details
 	 * @since 1.0.0
+	 * @param array
+	 * @return array
 	 * 
 	 */
 	public function get_post_details( $data = [] )

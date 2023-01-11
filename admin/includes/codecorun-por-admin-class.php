@@ -52,12 +52,6 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		add_action('wp_ajax_codecorun_offer_post_page_options',[$this, 'codecorun_offer_post_page_options']);
 		add_action('save_post_codecorun-por', [$this, 'save_rules']);
 
-		if(isset($_GET['por_debug'])){
-			print_r(get_post_meta($_GET['por_debug'],'codecorun-por-rules',true));
-			echo '===============<br/>';
-			print_r(get_post_meta($_GET['por_debug'],'codecorun-por-offers',true));
-			die();
-		}
     }
 	/**
 	 * 
@@ -204,8 +198,6 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	{	
 		array_splice( $columns, 2, 0, [__('Shortcode','codecorun-product-offer-rules')] );
 		array_splice( $columns, 3, 0, [__('Author','codecorun-product-offer-rules')] );
-		array_splice( $columns, 4, 0, [__('Expiry','codecorun-product-offer-rules')] );
-		array_splice( $columns, 5, 0, [__('Status','codecorun-product-offer-rules')] );
 		return $columns;
 	}
 
@@ -221,11 +213,12 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	{
 		switch($column){
 			case 0:
+				echo '[codecorun-offers id="' . $post_id . '"]';
 				break;
 			case 1:
 				$post_author_id = get_post_field( 'post_author', $post_id );
 				$user = get_userdata($post_author_id);
-				echo esc_attr($user->display_name);
+				echo '<a href="user-edit.php?user_id='.esc_attr( $post_author_id ).'" target="_blank">'.esc_html( $user->user_login ).'</a>';
 				break;
 			case 2:
 				break;
