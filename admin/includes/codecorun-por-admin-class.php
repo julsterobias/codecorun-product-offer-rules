@@ -52,6 +52,11 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		add_action('wp_ajax_codecorun_offer_post_page_options',[$this, 'codecorun_offer_post_page_options']);
 		add_action('save_post_codecorun-por', [$this, 'save_rules']);
 
+		if( !is_plugin_active( 'codecorun-product-offer-rules-pro/codecorun-por-pro.php' ) ){
+			add_action('admin_menu',[$this, 'custom_menu']);
+		}
+		
+
     }
 	/**
 	 * 
@@ -138,6 +143,36 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		wp_enqueue_style( 'woocommerce_admin_styles' );
 		wp_enqueue_style(CODECORUN_POR_PREFIX.'-admin-assets-css', CODECORUN_POR_URL.'admin/assets/admin.css');
 		wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_rules', $this->rules()['woo']);
+
+		if( is_plugin_active( 'codecorun-product-offer-rules-pro/codecorun-por-pro.php' ) ){
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_pro_rules', true );
+		}else{
+			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_pro_rules', null );
+		}
+	}
+
+	/**
+	 * 
+	 * custom_menu
+	 * @since 1.0.0
+	 * 
+	 * 
+	 */
+	public function custom_menu()
+	{
+		add_submenu_page(
+			'edit.php?post_type=codecorun-por',
+			__( 'Full Version', 'codecorun-product-offer-rules' ),
+			__( '<span style="color:#ff008c;">Full Version</span>', 'codecorun-product-offer-rules' ),
+			'manage_options',
+			'codecorun-por-custom-menu',
+			[$this, 'code_menu']
+		);
+	}
+
+	public function code_menu()
+	{
+
 	}
 
 	/**

@@ -213,85 +213,9 @@ class codecorun_por_main_class extends codecorun_por_common_class
             }
         endforeach;
 
-
-
-        //format collection for OR condition to group them together.
-        foreach($cond_value as $i => $con){
-
-            if($con == '||'){
-                $in = $i;
-                $in--;
-                $new_val_prev = $cond_value[$in];
-
-                if(is_numeric($new_val_prev))
-                    $new_val_prev = '('.$new_val_prev;
-                else
-                    $new_val_prev = str_replace(['(',')'],'',$new_val_prev);
-                
-                $cond_value[$in] = $new_val_prev;
-                $in_ = $i;
-                $in_++;
-                $new_val_nex = $cond_value[$in_];
-
-                if(is_numeric($new_val_nex))
-                    $new_val_nex = $new_val_nex.')';
-                else
-                    $new_val_nex = str_replace(['(',')'],'',$new_val_nex);
-
-                $cond_value[$in_] = $new_val_nex;
-            }
-
-        }
-
-        $grouped_range = [];
-        $grouped_break_points = [];
-        foreach($cond_value as $index => $_rule_){
-            if(!is_numeric($_rule_) && $_rule_ != '&&'){
-                if(strpos($_rule_,'(') !== false){
-                    $grouped_break_points[] = $index;
-                }
-                if(strpos($_rule_,')') !== false){
-                    $grouped_break_points[] = $index;
-                    $grouped_range[] = $grouped_break_points;
-                    $grouped_break_points = [];
-                }
-            }
-        }
-
-        //get the grouped and evaluate
-        $grouped_results = [];
-        foreach($grouped_range as $range){
-
-            $range_1 = $range[0];
-            $range_2 = $range[1];
-            $is_first = 0;
-            $g_index = null;
-            $g_result = 0;
-
-            for($x = $range_1; $x <= $range_2; $x++){
-                if(!is_numeric($cond_value[$x]) && $cond_value[$x] != '||'){
-                    $value = (int) str_replace(['(',')'],'',$cond_value[$x]);
-                }else{
-                    $value = $cond_value[$x];
-                }
-                if($value == 1){
-                    $g_result = 1;
-                }
-                if($is_first > 0){
-                    unset($cond_value[$x]);
-                }else{
-                    $g_index = $x;
-                }
-                $is_first++;
-            }
-
-            $grouped_results[$g_index] = $g_result;
-            
-        }
-
-        //re_assign grouped result rules 
-        foreach($grouped_results as $index => $result_){
-            $cond_value[$index] = $result_;
+        if( is_plugin_active( 'codecorun-product-offer-rules-pro/codecorun-por-pro.php' ) ){
+            $extend = new \codecorun_prule_full_main_class();
+            $cond_value = $extend::extend_operand( $cond_value );
         }
         
         //evaluate the 'and' operation

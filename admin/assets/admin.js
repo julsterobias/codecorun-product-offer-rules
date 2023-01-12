@@ -382,6 +382,23 @@ function codecorun_por_init_selectwoo(field_class = null)
         }
     );
 
+    
+    var options = [
+        {
+            text: 'And',
+            value: 'and'
+        }
+    ];
+
+    if( codecorun_por_pro_rules ){
+        options.push(
+            {
+                text: 'Or',
+                value: 'or'
+            }
+        );
+    }
+
     var el_con_field = codecorun_por_elementor__(
         {
             type: 'select',
@@ -395,16 +412,7 @@ function codecorun_por_init_selectwoo(field_class = null)
                     value: 'codecorun_por_field[condition-'+codecorun_por_unique_name()+']'
                 }
             ],
-            options: [
-                {
-                    text: 'And',
-                    value: 'and'
-                },
-                {
-                    text: 'Or',
-                    value: 'or'
-                }
-            ]
+            options: options
         }
     );
     el_con_label.appendChild(el_con_field);
