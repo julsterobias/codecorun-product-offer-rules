@@ -9,6 +9,8 @@
 namespace codecorun\por\main;
 use codecorun\por\common\codecorun_por_common_class;
 
+defined( 'ABSPATH' ) or die( 'No access area' );
+
 class codecorun_por_main_class extends codecorun_por_common_class
 {
     private static $instance = null;
@@ -213,7 +215,7 @@ class codecorun_por_main_class extends codecorun_por_common_class
             }
         endforeach;
 
-        if( is_plugin_active( 'codecorun-product-offer-rules-pro/codecorun-por-pro.php' ) ){
+        if( is_plugin_active( CODECORUN_POR_PRO_ID ) ){
             $extend = new \codecorun_prule_full_main_class();
             $cond_value = $extend::extend_operand( $cond_value );
         }

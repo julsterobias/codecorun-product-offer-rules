@@ -1,0 +1,87 @@
+.fdf{
+    margin-top: 20px !important;
+}
+.codecorun_full_version{
+    max-width: 800px;
+    background-color: white;
+    padding: 50px;
+    border-radius: 5px;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+.codecorun_full_version p{
+    font-size: 16px;
+}
+
+.codecorun_full_version .flow_char{
+    max-width: 300px;
+    margin-top: 30px;
+}
+.codecorun_full_version .flow_char .fc{
+    padding: 20px 30px;
+    font-size: 18px;
+    border: 5px solid #CCC;
+    margin: 50px 0;
+    font-weight: 600;
+    border-radius: 30px;
+}
+.codecorun_full_version .flow_char .fc.line{
+    position: relative;
+    border-bottom-color: black;
+}
+.codecorun_full_version .flow_char .fc.rule2{
+    position: relative;
+    border-top-color: black;
+}
+.codecorun_full_version .flow_char .fc.line:after{
+    content: ' ';
+    width: 5px;
+    height: 175px;
+    background-color: black;
+    position: absolute;
+    bottom: -175px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 0;
+}
+.codecorun_full_version .flow_char .fc.line.red:after{
+    background-color: #ff008c;
+}
+.codecorun_full_version .flow_char .fc.line.red{
+    position: relative;
+    border-bottom-color: #ff008c;
+}
+.codecorun_full_version .flow_char .fc.line.last:after{
+    background-color: #4C5DDD;
+    height: 57px;
+    bottom: -57px;
+}
+.codecorun_full_version .flow_char .fc.line.last{
+    position: relative;
+    border-bottom-color: #4C5DDD;
+    border-top-color: #ff008c;
+}
+.codecorun_full_version .flow_char .fc_con{
+    max-width: 50px;
+    border-color: black;
+    border-radius: 50px;
+    background-color: white;
+    position: relative;
+    z-index: 10px;
+}
+.codecorun_full_version .flow_char .fc_con_or{
+    border-color: #ff008c;
+}
+
+.fc_result{
+    background-color: #4C5DDD;
+    border: 0 !important;
+    display: block;
+    color: white;
+    text-decoration: none;
+}
+
+.fc_result:hover{
+    color: white;
+}

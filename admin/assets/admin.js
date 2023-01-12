@@ -12,6 +12,8 @@ var codecorun_por_offer_container = '#codecorun_por_admin_offer';
 var codecorun_por_rule_container = '#codecorun_por_rules_container';
 var codecorun_por_product_container = '#codecorun_por_admin_product_offer';
 
+var codecorun_por_labels = JSON.parse( codecorun_por_ui_labels );
+
 
 /**
  * 
@@ -47,7 +49,7 @@ var codecorun_init_to_offer_fields = function( type = '' ){
     var offer_header = codecorun_por_elementor__(
         {
             type: 'label',
-            text: 'Product(s) to offer'
+            text: codecorun_por_labels.products_to_offer
         }
     );
     offer_wrapper.appendChild(offer_header);
@@ -100,7 +102,7 @@ var codecorun_init_to_offer_fields = function( type = '' ){
         {
             el: '#' + id_,
             action: 'codecorun_offer_post_page_options',
-            placeholder: 'Select product',
+            placeholder: codecorun_por_labels.select_product,
             post_type: 'product'
         }
     );
@@ -137,7 +139,7 @@ var codecorun_init_to_rules_fields = function(){
          * last
          * 
          */
-    var options = [{text: 'Select Rule', value: ''}];
+    var options = [{text: codecorun_por_labels.select_rule , value: ''}];
     if(codecorun_por_rules){
         for(var x in codecorun_por_rules){
             options.push(
@@ -184,7 +186,7 @@ var codecorun_init_to_rules_fields = function(){
                 },
                 {
                     attr: 'value',
-                    value: 'Add Rule'
+                    value: codecorun_por_labels.add_rule
                 }
             ]
         }
@@ -210,7 +212,7 @@ var codecorun_init_to_rules_fields = function(){
     var no_rules_text = codecorun_por_elementor__(
         {
             type: 'span',
-            text: 'No rules available',
+            text: codecorun_por_labels.no_rules_available,
             attributes: [
                 {
                     attr: 'class',
@@ -378,14 +380,14 @@ function codecorun_por_init_selectwoo(field_class = null)
     var el_con_label = codecorun_por_elementor__(
         {
             type: 'label',
-            text: 'condition'
+            text: codecorun_por_labels.condition
         }
     );
 
     
     var options = [
         {
-            text: 'And',
+            text: codecorun_por_labels.and,
             value: 'and'
         }
     ];
@@ -393,7 +395,7 @@ function codecorun_por_init_selectwoo(field_class = null)
     if( codecorun_por_pro_rules ){
         options.push(
             {
-                text: 'Or',
+                text: codecorun_por_labels.or,
                 value: 'or'
             }
         );
@@ -434,7 +436,7 @@ function codecorun_por_init_selectwoo(field_class = null)
 
                 }
             ],
-            text: 'Remove'
+            text: codecorun_por_labels.remove
         }
     );
 
@@ -505,59 +507,59 @@ function codecorun_por_add_tooltip(args = null){
 var codecorun_field_label_payload = {
     last_views: {
         field_id: 'codecorun_dy_field_last_views',
-        label: 'Last viewed product(s)',
-        tooltip: 'Offer product(s) if the user viewed one or all selected product(s)',
+        label: codecorun_por_labels.last_viewed_products,
+        tooltip: codecorun_por_labels.last_viewed_products_tip,
         multiple: true,
-        placeholder: 'Select Product(s)',
+        placeholder: codecorun_por_labels.select_products,
         post_type: 'product'
     },
     had_purchased: {
         field_id: 'codecorun_dy_field_had_purchased',
-        label: 'Latest purchased product(s)',
-        tooltip: 'Offer the product(s) if the user purchased one or all selected product(s)',
+        label: codecorun_por_labels.last_purchased_products,
+        tooltip: codecorun_por_labels.last_purchased_products_tip,
         multiple: true,
-        placeholder: 'Select Product(s)',
+        placeholder: codecorun_por_labels.select_products,
         post_type: 'product'
     },
     in_post: {
         field_id: 'codecorun_dy_field_in_post',
-        label: 'In post(s)',
-        tooltip: 'Offer product(s) if the user is in post(s)',
+        label: codecorun_por_labels.in_posts,
+        tooltip: codecorun_por_labels.in_posts_tip,
         multiple: true,
-        placeholder: 'Select post(s)',
+        placeholder: codecorun_por_labels.select_post,
         post_type: 'post'
     },
     in_page: {
         field_id: 'codecorun_dy_field_in_page',
-        label: 'In page(s)',
-        tooltip: 'Offer product(s) if the user is in page(s)',
+        label: codecorun_por_labels.in_pages,
+        tooltip: codecorun_por_labels.in_pages_tip,
         multiple: true,
-        placeholder: 'Select page(s)',
+        placeholder: codecorun_por_labels.select_pages,
         post_type: 'page'
     },
     in_product_page: {
         field_id: 'codecorun_dy_field_in_product_page',
-        label: 'In product page',
-        tooltip: 'Offer product(s) if the user is in product page',
+        label: codecorun_por_labels.in_product_page,
+        tooltip: codecorun_por_labels.in_product_page_tip,
         multiple: false,
-        placeholder: 'Select product',
+        placeholder: codecorun_por_labels.select_product,
         post_type: 'product'
     },
     in_cart_products: {
         field_id: 'codecorun_dy_field_in_cart_products',
-        label: 'In cart product(s)',
-        tooltip: 'Offer product(s) if the user added on or all selected products',
+        label: codecorun_por_labels.in_cart_products,
+        tooltip: codecorun_por_labels.in_cart_products_tip,
         multiple: true,
-        placeholder: 'Select product',
+        placeholder: codecorun_por_labels.select_product,
         post_type: 'product'
     },
     have_url_param: {
         field_id: 'codecorun_dy_field_params_url',
-        label: 'Has URL parameters',
-        tooltip: 'Offer product(s) if the URL parameters are present',
+        label: codecorun_por_labels.has_url_parameters,
+        tooltip: codecorun_por_labels.has_url_parameters_tip,
         multiple: false,
-        placeholder_key: 'Key',
-        placeholder_value: 'Value'
+        placeholder_key: codecorun_por_labels.key,
+        placeholder_value: codecorun_por_labels.value
     }
 }
 
@@ -679,13 +681,13 @@ jQuery(document).ready(function(){
     var rule_label = codecorun_por_elementor__(
         {
             type: 'label',
-            text: 'Date'
+            text: codecorun_por_labels.date
         }
     );
 
     codecorun_por_add_tooltip({
         parent: rule_label,
-        text: 'Display offers if today\'s date is the date selected'
+        text: codecorun_por_labels.date_tip
     });
 
     var el = codecorun_por_elementor__(
@@ -742,7 +744,7 @@ var codecorun_por_render_date_range = function(values = []){
     var rule_label = codecorun_por_elementor__(
         {
             type: 'label',
-            text: 'Date Range',
+            text: codecorun_por_labels.date_range,
             attributes: [
                 {
                     attr: 'class',
@@ -754,7 +756,7 @@ var codecorun_por_render_date_range = function(values = []){
 
     codecorun_por_add_tooltip({
         parent: rule_label,
-        text: 'Display offers if the date today is within the date range selected'
+        text: codecorun_por_labels.date_range_tip
     });
 
     parent.appendChild(rule_label);
@@ -762,7 +764,7 @@ var codecorun_por_render_date_range = function(values = []){
     var label_from = codecorun_por_elementor__(
         {
             type: 'label',
-            text: 'From',
+            text: codecorun_por_labels.from,
             attributes: [
                 {
                     attr: 'class',
@@ -804,7 +806,7 @@ var codecorun_por_render_date_range = function(values = []){
     var label_to = codecorun_por_elementor__(
         {
             type: 'label',
-            text: 'To',
+            text: codecorun_por_labels.to,
             attributes: [
                 {
                     attr: 'class',
@@ -847,7 +849,7 @@ var codecorun_por_render_date_range = function(values = []){
 
 var codecorun_por_render_is_logged_in = function(user_id = 0, type = null){
     var unique_id = codecorun_por_unique_name();
-    var text = 'User is logged in (no field to setup)';
+    var text = codecorun_por_labels.user_is_logged;
     var parent = codecorun_por_elementor__(
         {
             type: 'div',
@@ -1148,7 +1150,7 @@ var codecorun_por_url_param = function( params = [], rule = '', attrs = []){
                     },
                     {
                         attr: 'title',
-                        value: 'Add'
+                        value: codecorun_por_labels.add
                     }
                 ],
                 text: '+'
@@ -1164,7 +1166,7 @@ var codecorun_por_url_param = function( params = [], rule = '', attrs = []){
                     },
                     {
                         attr: 'title',
-                        value: 'Remove'
+                        value: codecorun_por_labels.remove
                     }
                 ],
                 text: '-'

@@ -52,7 +52,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		add_action('wp_ajax_codecorun_offer_post_page_options',[$this, 'codecorun_offer_post_page_options']);
 		add_action('save_post_codecorun-por', [$this, 'save_rules']);
 
-		if( !is_plugin_active( 'codecorun-product-offer-rules-pro/codecorun-por-pro.php' ) ){
+		if( !is_plugin_active( CODECORUN_POR_PRO_ID ) ){
 			add_action('admin_menu',[$this, 'custom_menu']);
 		}
 		
@@ -144,11 +144,56 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		wp_enqueue_style(CODECORUN_POR_PREFIX.'-admin-assets-css', CODECORUN_POR_URL.'admin/assets/admin.css');
 		wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_rules', $this->rules()['woo']);
 
-		if( is_plugin_active( 'codecorun-product-offer-rules-pro/codecorun-por-pro.php' ) ){
+		if( is_plugin_active( CODECORUN_POR_PRO_ID ) ){
 			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_pro_rules', true );
 		}else{
 			wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_pro_rules', null );
+			if( isset( $_GET['page'] ) ){
+				if( $_GET['page'] == 'codecorun-por-custom-menu')
+					wp_enqueue_style(CODECORUN_POR_PREFIX.'-admin-market-css', CODECORUN_POR_URL.'admin/assets/market.css');
+			}
 		}
+
+		//load js translatable labels
+		wp_localize_script( CODECORUN_POR_PREFIX.'-admin-assets-js', 'codecorun_por_ui_labels', json_encode( [
+			'products_to_offer' => __( 'Product(s) to offer', 'codecorun-product-offer-rules' ),
+			'no_rules_available' => __( 'No rules available', 'codecorun-product-offer-rules' ),
+			'add_rule' => __( 'Add Rule', 'codecorun-product-offer-rules' ),
+			'select_rule' => __( 'Select Rule', 'codecorun-product-offer-rules' ),
+			'date' => __( 'Date', 'codecorun-product-offer-rules' ),
+			'date_tip' => __( 'Display the offer if today\'s date is the date selected', 'codecorun-product-offer-rules' ),
+			'condition' => __( 'condition', 'codecorun-product-offer-rules' ),
+			'and' => __( 'And', 'codecorun-product-offer-rules' ),
+			'or' => __( 'Or', 'codecorun-product-offer-rules' ),
+			'remove' => __( 'Remove', 'codecorun-product-offer-rules' ),
+			'date_range' => __( 'Date Range', 'codecorun-product-offer-rules' ),
+			'date_range_tip' => __( 'Display the offer if the date today is within the date range selected', 'codecorun-product-offer-rules' ),
+			'from' => __( 'From', 'codecorun-product-offer-rules' ),
+			'to' => __( 'To', 'codecorun-product-offer-rules' ),
+			'in_cart_products' => __( 'In cart product(s)', 'codecorun-product-offer-rules' ),
+			'in_cart_products_tip' => __( 'Display the offers if the user added one or all selected products in their cart', 'codecorun-product-offer-rules' ),
+			'in_product_page' => __( 'In product page', 'codecorun-product-offer-rules' ),
+			'in_product_page_tip' => __( 'Display the offer if the user is in the product page', 'codecorun-product-offer-rules' ),
+			'select_product' => __( 'Select Product', 'codecorun-product-offer-rules' ),
+			'select_products' => __( 'Select Product(s)', 'codecorun-product-offer-rules' ),
+			'user_is_logged' => __( 'User is logged in (no field to setup)', 'codecorun-product-offer-rules' ),
+			'in_pages' => __( 'In page(s)', 'codecorun-product-offer-rules' ),
+			'select_pages' => __( 'Select Page(s)', 'codecorun-product-offer-rules' ),
+			'in_pages_tip' => __( 'Display the offer if the user is in the page', 'codecorun-product-offer-rules' ),
+			'in_posts' => __( 'In post(s)', 'codecorun-product-offer-rules' ),
+			'in_posts_tip' => __( 'Display the offer if the user is in the post', 'codecorun-product-offer-rules' ),
+			'select_post' => __( 'Select Post(s)', 'codecorun-product-offer-rules' ),
+			'last_viewed_products' => __( 'Last viewed product(s)', 'codecorun-product-offer-rules' ),
+			'last_viewed_products_tip' => __( 'Display the offer if the user viewed one or all selected products', 'codecorun-product-offer-rules' ),
+			'last_purchased_products' => __( 'Latest purchased product(s)', 'codecorun-product-offer-rules' ),
+			'last_purchased_products_tip' => __( 'Display the offer if the user purchased one or all selected products', 'codecorun-product-offer-rules' ),
+			'has_url_parameters' => __( 'Has URL parameters', 'codecorun-product-offer-rules' ),
+			'has_url_parameters_tip' => __( 'Display the offer if the URL has all the parameters', 'codecorun-product-offer-rules'),
+			'key' => __( 'Key', 'codecorun-product-offer-rules' ),
+			'value' => __( 'Value', 'codecorun-product-offer-rules' ),
+			'add' => __( 'Add', 'codecorun-product-offer-rules')
+		] ) );
+		
 	}
 
 	/**
@@ -163,7 +208,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 		add_submenu_page(
 			'edit.php?post_type=codecorun-por',
 			__( 'Full Version', 'codecorun-product-offer-rules' ),
-			__( '<span style="color:#ff008c;">Full Version</span>', 'codecorun-product-offer-rules' ),
+			'<span style="color:#ff008c;">'.esc_html__( 'Full Version', 'codecorun-product-offer-rules' ).'</span>',
 			'manage_options',
 			'codecorun-por-custom-menu',
 			[$this, 'code_menu']
@@ -172,14 +217,15 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 
 	public function code_menu()
 	{
-
+		$this->set_template('full-version',['other' => 'admin']);
 	}
 
+	
 	/**
 	 * 
 	 * 
-	 * 
-	 * 
+	 * register_post_type
+	 * @since 1.0.0
 	 * 
 	 * 
 	 */
@@ -254,10 +300,6 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 				$post_author_id = get_post_field( 'post_author', $post_id );
 				$user = get_userdata($post_author_id);
 				echo '<a href="user-edit.php?user_id='.esc_attr( $post_author_id ).'" target="_blank">'.esc_html( $user->user_login ).'</a>';
-				break;
-			case 2:
-				break;
-			case 3:
 				break;
 		}
 	}

@@ -8,6 +8,8 @@
  */
 namespace codecorun\por\common;
 
+defined( 'ABSPATH' ) or die( 'No access area' );
+
 class codecorun_por_common_class
 {
     /**
