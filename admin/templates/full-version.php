@@ -14,7 +14,7 @@
         <a href="" class="fc_result fc"><?php esc_attr_e( 'GET THE FULL VERSION', 'codecorun-product-offer-rules' ); ?></a>
     </div>
 
-    <p><a href="https://codecorun.com/documentation/codecorun-product-offer-rules/" target="_blank"><?php esc_attr_e( 'Documentation', 'codecorun-product-offer-rules' ); ?></a> | <a href="https://codecorun.com/my-tickets/" target="_blank"><?php esc_attr_e( 'Get Support', 'codecorun-product-offer-rules' ); ?></a></p>
+    <p><a href="https://codecorun.com/my-tickets/" target="_blank"><?php esc_attr_e( 'Get Support', 'codecorun-product-offer-rules' ); ?></a></p>
     </center>
     
 </div>

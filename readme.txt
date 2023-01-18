@@ -40,11 +40,6 @@ No, unfortunately it's not possible for now but we are working on it.
 
 Yes, but for the "And" operand only to get the "Or" you have to get the full version
 
-== Screenshots ==
-
-1. screenshot-1a.jpg
-2. screenshot-2b.jpg
-
 == Changelog
 
 = 1.0.0

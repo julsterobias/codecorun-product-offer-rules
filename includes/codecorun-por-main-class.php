@@ -75,6 +75,11 @@ class codecorun_por_main_class extends codecorun_por_common_class
                 setcookie( 'codecorun_recent_prod_viewed', $viewed, time()+86400, '/' );
            }else{
                 $viewed = explode(',', $_COOKIE['codecorun_recent_prod_viewed'] );
+                //sanitize array data
+                $viewed = array_map( function( $ar ){
+                    return sanitize_text_field( $ar );
+                }, $viewed );
+
                 $viewed[] = $post->ID;
                 $viewed = array_unique( $viewed );
                 //update cookie
@@ -216,7 +221,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
         endforeach;
 
         if( is_plugin_active( CODECORUN_POR_PRO_ID ) ){
-            $extend = new \codecorun_prule_full_main_class();
+            $prospace = 'codecorun\prule\full\main\codecorun_prule_full_main_class';
+            $extend = new $prospace;
             $cond_value = $extend::extend_operand( $cond_value );
         }
         
@@ -361,6 +367,12 @@ class codecorun_por_main_class extends codecorun_por_common_class
         $last_cookie = ( isset( $_COOKIE['codecorun_recent_prod_viewed'] ) )? $_COOKIE['codecorun_recent_prod_viewed'] : null;
         if( $last_cookie ){
             $last_cookie = explode(',', $last_cookie);
+
+            //sanitize array value
+            $last_cookie = array_map( function( $ar ){
+                return sanitize_text_field( $ar );
+            }, $last_cookie );
+
             foreach( $rules as $rule ){
                 if( in_array( $rule['id'], $last_cookie ) ){
                     return 1;
@@ -408,6 +420,11 @@ class codecorun_por_main_class extends codecorun_por_common_class
     public function have_url( $rules )
     {
         $params = $_GET;
+
+        $params = array_map( function( $val ){
+            return sanitize_text_field( $val );
+        }, $params );
+
         if( !empty( $params ) ){
             
             $it_has = 0;

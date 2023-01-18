@@ -1,13 +1,13 @@
 <div>
     <p>
         <label><?php esc_html_e('Shortcode', 'codecorun-product-offer-rules'); ?>
-            <input type="text" class="widefat" readonly value="<?php esc_attr_e($params['shortcode'], 'codecorun-product-offer-rules') ?>">
+            <input type="text" class="widefat" readonly value="<?php echo esc_attr( $params['shortcode'] ); ?>">
         </label>
     </p>
     <p>
         <label>
             <?php esc_html_e('Offer Title', 'codecorun-product-offer-rules'); ?>
-            <input type="text" class="widefat" name="codecorun_setting_offer_title" value="<?php echo ( !empty( $params['settings']['offer_tile'] ) )? esc_attr__( $params['settings']['offer_tile'] ) : null; ?>">
+            <input type="text" class="widefat" name="codecorun_setting_offer_title" value="<?php echo ( !empty( $params['settings']['offer_tile'] ) )? esc_attr( $params['settings']['offer_tile'] ) : null; ?>">
         </label>
     </p>
     <p>

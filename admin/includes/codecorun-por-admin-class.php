@@ -81,12 +81,13 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 
 		}elseif ( $pagenow == 'post-new.php' ){
 
-			if( !isset( $_GET['post_type'] ) )
+			if( !isset( $_GET['post_type'] ) ){
 				$abort = true;
-
-			if( $_GET['post_type'] != 'codecorun-por' )
-				$abort = true;
-
+			}else{
+				if( $_GET['post_type'] != 'codecorun-por' )
+					$abort = true;
+			}
+				
 		}
 
 		if($abort)
@@ -103,7 +104,6 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			$offers = get_post_meta( $post_id, 'codecorun-por-offers', true );
 			$rules = get_post_meta( $post_id, 'codecorun-por-rules', true );
 			$fallback = get_post_meta( $post_id, 'codecorun-por-fallback', true);
-		
 
 			if( $offers ){
 				$offers = $this->prepare_offers_data( $offers, $post_id );
@@ -123,10 +123,6 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 
 			if( $rules ){
 				$rules = $this->prepare_rules_data( $rules, $post_id );
-				if( isset( $_GET['debug']) ){
-					print_r($rules);
-					die();
-				}
 				$rules = json_encode( $rules );
 			}else{
 				$rules = null;
@@ -551,8 +547,8 @@ class codecorun_por_admin_class extends codecorun_por_common_class
                         $prev_key = $rule;
                     }else{
                         $meta_param = [
-                            'key' => $prev_key,
-                            'value' => $rule
+                            'key' => sanitize_text_field( $prev_key ),
+                            'value' => sanitize_text_field( $rule )
                         ];
                         $new_format_[] = $meta_param;
                         $meta_param = null;
