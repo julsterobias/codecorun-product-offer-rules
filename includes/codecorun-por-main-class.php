@@ -216,17 +216,17 @@ class codecorun_por_main_class extends codecorun_por_common_class
             }
         endforeach;
 
+        $apply_offer = true;
         if( is_plugin_active( CODECORUN_POR_PRO_ID ) ){
             $prospace = 'codecorun\prule\full\main\codecorun_prule_full_main_class';
             $extend = new $prospace;
-            $cond_value = $extend::extend_operand( $cond_value );
-        }
-        
-        //evaluate the 'and' operation
-        $apply_offer = true;
-        foreach($cond_value as $result_and){
-            if($result_and == 0){
-                $apply_offer = false;
+            $apply_offer = $extend::extend_operand( $cond_value );
+        }else{
+            //evaluate the 'and' operation
+            foreach($cond_value as $result_and){
+                if($result_and == 0){
+                    $apply_offer = false;
+                }
             }
         }
 

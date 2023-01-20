@@ -11,7 +11,7 @@
         <div class="fc_rule fc rule2 line red"><?php esc_attr_e( 'Rule: In Page', 'codecorun-product-offer-rules' ); ?></div>
         <div class="fc_con fc fc_con_or"><?php esc_attr_e( 'Or', 'codecorun-product-offer-rules' ); ?></div>
         <div class="fc_rule fc line last"><?php esc_attr_e( 'Rule: In Post', 'codecorun-product-offer-rules' ); ?></div>
-        <a href="" class="fc_result fc"><?php esc_attr_e( 'GET THE FULL VERSION', 'codecorun-product-offer-rules' ); ?></a>
+        <a href="https://codecorun.com/plugins/product-offer-rules-for-woocommerce/" target="_blank" class="fc_result fc"><?php esc_attr_e( 'GET THE FULL VERSION', 'codecorun-product-offer-rules' ); ?></a>
     </div>
 
     <p><a href="https://codecorun.com/my-tickets/" target="_blank"><?php esc_attr_e( 'Get Support', 'codecorun-product-offer-rules' ); ?></a></p>
