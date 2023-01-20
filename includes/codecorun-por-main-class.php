@@ -411,11 +411,7 @@ class codecorun_por_main_class extends codecorun_por_common_class
      */
     public function have_url( $rules )
     {
-        $params = $_GET;
-
-        $params = array_map( function( $val ){
-            return sanitize_text_field( $val );
-        }, $params );
+        $params = array_map( 'sanitize_text_field' , $_GET );
 
         if( !empty( $params ) ){
             
