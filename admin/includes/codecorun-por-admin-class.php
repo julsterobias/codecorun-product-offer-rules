@@ -286,8 +286,9 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 	 * @return
 	 * 
 	 */
-	public function table_tabs_content($column, $post_id)
+	public function table_tabs_content( $column, $post_id )
 	{
+		$post_id = sanitize_text_field( $post_id );
 		switch($column){
 			case 0:
 				echo '[codecorun-offers id="' . $post_id . '"]';
@@ -298,6 +299,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 				echo '<a href="user-edit.php?user_id='.esc_attr( $post_author_id ).'" target="_blank">'.esc_html( $user->user_login ).'</a>';
 				break;
 		}
+
 	}
 
 	/**

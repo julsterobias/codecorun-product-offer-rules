@@ -366,12 +366,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
     {
         $last_cookie = ( isset( $_COOKIE['codecorun_recent_prod_viewed'] ) )? $_COOKIE['codecorun_recent_prod_viewed'] : null;
         if( $last_cookie ){
-            $last_cookie = explode(',', $last_cookie);
-
-            //sanitize array value
-            $last_cookie = array_map( function( $ar ){
-                return sanitize_text_field( $ar );
-            }, $last_cookie );
+             //sanitize array value
+            $last_cookie = array_map( 'sanitize_text_field', explode(',', $_COOKIE['codecorun_recent_prod_viewed'] ) );
 
             foreach( $rules as $rule ){
                 if( in_array( $rule['id'], $last_cookie ) ){
