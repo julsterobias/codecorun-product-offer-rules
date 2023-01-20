@@ -74,12 +74,8 @@ class codecorun_por_main_class extends codecorun_por_common_class
                 $viewed = implode( [$post->ID] );
                 setcookie( 'codecorun_recent_prod_viewed', $viewed, time()+86400, '/' );
            }else{
-                $viewed = explode(',', $_COOKIE['codecorun_recent_prod_viewed'] );
                 //sanitize array data
-                $viewed = array_map( function( $ar ){
-                    return sanitize_text_field( $ar );
-                }, $viewed );
-
+                $viewed = array_map('sanitize_text_field', explode(',', $_COOKIE['codecorun_recent_prod_viewed'] ) );
                 $viewed[] = $post->ID;
                 $viewed = array_unique( $viewed );
                 //update cookie
