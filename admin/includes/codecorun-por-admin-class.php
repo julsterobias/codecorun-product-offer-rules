@@ -187,7 +187,11 @@ class codecorun_por_admin_class extends codecorun_por_common_class
 			'has_url_parameters_tip' => __( 'Display the offer if the URL has all the parameters', 'codecorun-product-offer-rules'),
 			'key' => __( 'Key', 'codecorun-product-offer-rules' ),
 			'value' => __( 'Value', 'codecorun-product-offer-rules' ),
-			'add' => __( 'Add', 'codecorun-product-offer-rules')
+			'add' => __( 'Add', 'codecorun-product-offer-rules'),
+			'user_have_meta' => __('User have meta', 'codecorun-product-offer-rules'),
+			'user_have_meta_tip' => __( 'Display the offer if the user have all the meta value', 'codecorun-product-offer-rules' ),
+			'user_meta_key' => __( 'Key', 'codecorun-product-offer-rules' ),
+			'user_meta_value' => __( 'Value', 'codecorun-product-offer-rules' ),
 		] ) );
 		
 	}
@@ -540,7 +544,7 @@ class codecorun_por_admin_class extends codecorun_por_common_class
         //reloop and check for index to reformat their data structure
         foreach($offer_rules as $index => $rules){
             $what_index = explode('-', $index);
-            if($what_index[0] == 'have_metas' || $what_index[0] == 'have_url_param'){
+            if($what_index[0] == 'user_have_meta' || $what_index[0] == 'have_url_param'){
                 //do reformatting
                 $prev_key = null;
                 $new_format_ = [];

@@ -37,13 +37,10 @@ class codecorun_por_common_class
 		$plugin_folder = explode('/',CODECORUN_POR_URL);
 		$plugin_folder = array_filter($plugin_folder);
 
-		$path = get_template_directory().'/'.end($plugin_folder).'/'.$other.'templates';
-		$child = get_template_directory().'-child/'.end($plugin_folder).'/'.$other.'templates';
+		$path = get_stylesheet_directory().'/'.end($plugin_folder).'/'.$other.'templates';		
 
-		if(is_dir($path.'/'.$file)){
+		if(file_exists($path.'/'.$file)){
 			include $path.'/'.$file;
-		}elseif(is_dir($child.'/'.$file)){
-			include $child.'/'.$file;
 		}else{
 			if(isset($params['other'])){
 				$other = $params['other'];
@@ -78,7 +75,8 @@ class codecorun_por_common_class
                     'in_post' => __('In post','codecorun-product-offer-rules'),
                     'last_views' => __('Last product views','codecorun-product-offer-rules'),
                     'had_purchased' => __('Last purchased product(s)','codecorun-product-offer-rules'),
-					'have_url_param' => __('Have URL Parameter', 'codecorun-product-offer-rules')
+					'have_url_param' => __('Have URL Parameter', 'codecorun-product-offer-rules'),
+					'user_have_meta' => __('User have meta', 'codecorun-product-offer-rules')
 				]
 			]
 		);

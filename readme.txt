@@ -3,7 +3,7 @@ Contributors: codecorun
 Tags: Extension, WooCommerce, Product, eCommerce, upsell
 Requires at least: 4.7
 Tested up to: 6.1.1
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -11,13 +11,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 An extension plugin for WooCommerce to let you upsell products with rules and conditions
 
 == Description ==
-Upsell your products more accurately and dynamically. With this plugin you can control and personalize what products to offers without coding. Using the simple UI you can build your rules and conditions to what products to offer.
+Upsell your products more accurately and dynamically. With this plugin you can control and personalize what products to offers without coding. Using the simple UI you can build your rules and conditions for situations and circumtances.
 
 == When the plugin is best to use? ==
 When you are upselling products and want to personalize what products should display for every situation.
 
 == How does it work? ==
-You build the rules and conditions to upsell the products and if the condition fails you have an option to display the default products.
+You build the rules and conditions to upsell the products and if the condition fails you have an option to display the default offer.
 
 Features:
 
@@ -28,7 +28,7 @@ Features:
 * Shortcode is available
 
 
-For more details about the plugin visit our site [codecorun](https://codecorun.com/documentation/codecorun-product-offer-rules/ "Codecorun Coupon Discount Rules")
+For more details about the plugin visit our site [codecorun](https://codecorun.com/plugins/product-offer-rules-for-woocommerce/ "Codecorun Coupon Discount Rules")
 
 == Frequently Asked Questions ==
 
@@ -40,7 +40,16 @@ No, unfortunately it's not possible for now but we are working on it.
 
 Yes, but for the "And" operand only to get the "Or" you have to get the full version
 
+== Screenshots ==
+
+1. screenshot-1.jpg
+2. screenshot-2.jpg
+
 == Changelog
 
 = 1.0.0
 * Initial Release
+
+= 1.1.0
+* Fix html templating so that user can customize them in their theme or child theme
+* add new rule - User have meta

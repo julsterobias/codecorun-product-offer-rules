@@ -560,6 +560,14 @@ var codecorun_field_label_payload = {
         multiple: false,
         placeholder_key: codecorun_por_labels.key,
         placeholder_value: codecorun_por_labels.value
+    },
+    user_have_meta: {
+        field_id: 'codecorun_dy_field_user_have_meta',
+        label: codecorun_por_labels.user_have_meta,
+        tooltip: codecorun_por_labels.user_have_meta_tip,
+        multiple: false,
+        placeholder_key: codecorun_por_labels.user_meta_key,
+        placeholder_value: codecorun_por_labels.user_meta_value
     }
 }
 
@@ -594,6 +602,7 @@ jQuery(document).ready(function(){
                 codecorun_por_generate_fields( [], value, codecorun_field_label_payload[value] );
                 break;
             case 'have_url_param':
+            case 'user_have_meta':
                 codecorun_por_url_param( [], value, codecorun_field_label_payload[value] );
                 break;
         }
@@ -1210,7 +1219,6 @@ var codecorun_render_saved_offers = function ( type = '' )
         codecorun_saved_offers = JSON.parse( codecorun_saved_offers );
         var options = [];
         var options_selected = [];
-        console.log( codecorun_saved_offers );
         for(var x in codecorun_saved_offers){
             options.push(
                 {
@@ -1276,6 +1284,7 @@ var codecorun_render_saved_rules = function ()
                     codecorun_por_generate_fields( codecorun_saved_rules[x], get_type[1], codecorun_field_label_payload[get_type[1]] );
                     break;
                 case 'have_url_param':
+                case 'user_have_meta':
                     codecorun_por_url_param( codecorun_saved_rules[x], index[0], codecorun_field_label_payload[ index[0] ] );
                     break;
                 case 'condition':

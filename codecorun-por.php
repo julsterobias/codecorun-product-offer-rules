@@ -7,7 +7,7 @@
  * Author:      Codecorun
  * Plugin Type: Extension
  * Author URI: https://codecorun.com
- * Version: 1.0.0
+ * Version: 1.1.0
  * Text Domain: codecorun-product-offer-rules
  * 
  * 
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) or die( 'No access area' );
 define('CODECORUN_POR_PATH', plugin_dir_path( __FILE__ ));
 define('CODECORUN_POR_URL', plugin_dir_url( __FILE__ ));
 define('CODECORUN_POR_PREFIX','codecorun_por');
-define('CODECORUN_POR_VERSION','1.0.0');
+define('CODECORUN_POR_VERSION','1.1.0');
 define('CODECORUN_POR_PRO_ID', 'codecorun-product-offer-rules-pro/codecorun-por-pro.php');
 
 

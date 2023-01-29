@@ -208,6 +208,9 @@ class codecorun_por_main_class extends codecorun_por_common_class
                 case 'have_url_param':
                     $cond_value[] = $this->have_url( $rule );
                     break;
+                case 'user_have_meta':
+                    $cond_value[] = $this->have_meta( $rule );
+                    break;
                 case 'condition':
                     $cond_value[] = ($rule == 'and')? '&&' : '||';
                     break;
@@ -436,6 +439,39 @@ class codecorun_por_main_class extends codecorun_por_common_class
 
     }
 
+    /**
+     * 
+     * 
+     * have_meta
+     * @since 1.1.0
+     * @param array
+     * @return int
+     * 
+     * 
+     */
+    public function have_meta( $rules )
+    {
+        $user_id = get_current_user_id();
+        if( !$user_id )
+            return 0;
+
+        $has = 0;
+        foreach( $rules as $rule ){
+            $meta = get_user_meta( $user_id, $rule['key'], true );
+            if( !empty($meta) ){
+                if( $meta == $rule['value'] ){
+                    $has++;
+                }
+            }
+        }
+
+        if( count( $rules ) == $has ){
+            return 1;
+        }else{
+            return 0;
+        }
+
+    }
 
 
     
